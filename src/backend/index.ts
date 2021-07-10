@@ -27,9 +27,25 @@ const extractSummary = async (filePath: string): Promise<RunSummary> => {
   const totalTime = fitDecoder.getRecordFieldValue(json, 'session', 'total_timer_time')[0] / 1000
   const avgHeartRate = fitDecoder.getRecordFieldValue(json, 'session', 'avg_heart_rate')[0]
   const avgSpeed = fitDecoder.getRecordFieldValue(json, 'session', 'avg_speed')[0]
-  const avgCadence = fitDecoder.getRecordFieldValue(json, 'session', 'avg_cadence')[0]
+  const avgCadence = fitDecoder.getRecordFieldValue(json, 'session', 'avg_cadence')[0] * 2
 
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
+}
+
+const extractDetails = async (filePath: string) => {
+  const file = await readFile(filePath)
+  const buffer = file.buffer
+
+  const jsonRaw = fitDecoder.fit2json(buffer)
+  const json = fitDecoder.parseRecords(jsonRaw)
+
+  const timestamp = fitDecoder.getRecordFieldValue(json, 'record', 'timestamp')
+  const distance = fitDecoder.getRecordFieldValue(json, 'record', 'distance')
+  const speed = fitDecoder.getRecordFieldValue(json, 'record', 'speed')
+  const hrt = fitDecoder.getRecordFieldValue(json, 'record', 'heart_rate')
+  const cadence = fitDecoder.getRecordFieldValue(json, 'record', 'cadence')
+
+  return {timestamp, distance, speed, hrt, cadence}
 }
 
 //
@@ -37,6 +53,17 @@ const extractSummary = async (filePath: string): Promise<RunSummary> => {
 //
 const buildApplication = ({runsRootPath}) => {
   const app = express()
+
+  app.get('/api/runs/:id', async (req, res) => {
+    const { id } = req.params
+    const filePath = path.join(runsRootPath, id)
+
+    const summary = await extractSummary(filePath)
+    const details = await extractDetails(filePath)
+
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify({id, filePath, details, summary}))
+  })
 
   app.get('/api/runs', async (req, res) => {
     const runFilenames = await readdir(runsRootPath)
