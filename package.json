@@ -1,0 +1,29 @@
+{
+    "name": "running",
+    "version": "0.0.1",
+    "private": true,
+    "description": "Lightweight fitness tracking app for runners",
+    "main": "src/backend/index.ts",
+    "scripts": {
+        "build": "npm run build:frontend && npm run build:backend",
+        "build:backend": "tsc",
+        "build:frontend": "parcel build -d dist/frontend src/frontend/index.html",
+        "start": "node dist/backend/index.js",
+        "dev:backend": "nodemon -e ts --exec \"ts-node src/backend/index.ts\"",
+        "dev:frontend": "parcel watch -d dist/frontend src/frontend/index.html"
+    },
+    "author": "Adam Neumann",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.17.1"
+    },
+    "devDependencies": {
+        "@types/express": "^4.17.1",
+        "nodemon": "^2.0.4",
+        "parcel-bundler": "^1.12.5",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "ts-node": "^10.1.0",
+        "typescript": "^4.3.5"
+    }
+}
