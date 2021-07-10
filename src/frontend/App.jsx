@@ -4,6 +4,7 @@ import {DateTime, Duration} from 'luxon'
 import {Link, Route, Switch, useParams} from 'react-router-dom'
 import L from 'leaflet'
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet'
+import {FlexibleWidthXYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
 
 //
 // Configure leaflet
@@ -21,6 +22,14 @@ L.Icon.Default.mergeOptions({
 // Styling
 //
 import 'leaflet/dist/leaflet.css'
+import 'react-vis/dist/style'
+
+//
+// Core utilties
+//
+
+// https://stackoverflow.com/a/22015930
+const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
 //
 // Response parsing
@@ -165,6 +174,22 @@ const RunDetails = () => {
         />
         <Polyline pathOptions={lineOptions} positions={details.details.location} />
       </MapContainer>
+      <div style={{height: 200}}>
+        <FlexibleWidthXYPlot height={200} getX={d => d[0]} getY={d => d[1]}>
+          <HorizontalGridLines />
+          <LineSeries data={zip(details.details.distance, details.details.speed)} />
+          <XAxis />
+          <YAxis />
+        </FlexibleWidthXYPlot>
+      </div>
+      <div style={{height: 200}}>
+        <FlexibleWidthXYPlot height={200} getX={d => d[0]} getY={d => d[1]}>
+          <HorizontalGridLines />
+          <LineSeries data={zip(details.details.distance, details.details.hrt)} />
+          <XAxis />
+          <YAxis />
+        </FlexibleWidthXYPlot>
+      </div>
     </div>
   )
 }
