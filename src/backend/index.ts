@@ -5,6 +5,13 @@ const {readdir, readFile} = require('fs').promises
 const fitDecoder = require('fit-decoder')
 
 //
+// Core utilties
+//
+
+// https://stackoverflow.com/a/22015930
+const zip = (a, b) => a.map((k, i) => [k, b[i]]);
+
+//
 // FIT data extraction
 //
 interface RunSummary {
@@ -40,12 +47,16 @@ const extractDetails = async (filePath: string) => {
   const json = fitDecoder.parseRecords(jsonRaw)
 
   const timestamp = fitDecoder.getRecordFieldValue(json, 'record', 'timestamp')
+  const location = zip(
+    fitDecoder.getRecordFieldValue(json, 'record', 'position_lat'),
+    fitDecoder.getRecordFieldValue(json, 'record', 'position_long')
+  )
   const distance = fitDecoder.getRecordFieldValue(json, 'record', 'distance')
   const speed = fitDecoder.getRecordFieldValue(json, 'record', 'speed')
   const hrt = fitDecoder.getRecordFieldValue(json, 'record', 'heart_rate')
   const cadence = fitDecoder.getRecordFieldValue(json, 'record', 'cadence')
 
-  return {timestamp, distance, speed, hrt, cadence}
+  return {timestamp, location, distance, speed, hrt, cadence}
 }
 
 //
