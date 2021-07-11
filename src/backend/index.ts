@@ -3,6 +3,7 @@ const path = require('path')
 const {DateTime} = require('luxon')
 const {readdir, readFile} = require('fs').promises
 const fitDecoder = require('fit-decoder')
+const Z = require('zebras')
 
 //
 // Core utilties
@@ -60,6 +61,80 @@ const extractDetails = async (filePath: string) => {
 }
 
 //
+// Planning
+//
+const WEEKLY_GAIN_MAX = 1.1
+
+interface WeeklyPlan {
+  start: typeof DateTime
+  accruedDistance: number
+  projectedDistance: number
+  remainingDistance: number
+}
+
+interface Plan {
+  weeks: WeeklyPlan[]
+}
+
+const firstDayOfWeek = (run: RunSummary): string => {
+  return run.startTime.startOf('week').toISO()
+}
+
+const addMissingWeeks = (incomplete) => {
+  const dates = Z.getCol('group', incomplete)
+  const start = DateTime.fromISO(dates[0])
+  const finish = DateTime.fromISO(dates[dates.length - 1])
+
+  const missing = []
+  let cursor = start
+  while (cursor <= finish) {
+    if (!dates.includes(cursor.toISO())) {
+      missing.push({group: cursor.toISO(), sum: 0})
+    }
+    cursor = cursor.plus({weeks: 1})
+  }
+
+  return Z.concat(incomplete, missing)
+}
+
+// TODO: enhance to work with weeks w/ 0 accrued
+const computeProjectedDistance = (weeklyGain) => (accruedDistances) => {
+  if (accruedDistances.length >= 2) {
+    const previousAccrued = accruedDistances[accruedDistances.length - 2]
+    return previousAccrued * weeklyGain
+  } else {
+    return 0
+  }
+}
+
+const computePlan = (runs: RunSummary[], weeklyGain: number): Plan => {
+  const byWeeks = Z.groupBy(firstDayOfWeek, runs)
+  const distanceByWeek = Z.gbSum('totalDistance', byWeeks)
+  const distanceByAllWeeks = addMissingWeeks(distanceByWeek)
+
+  const weeks = distanceByAllWeeks.map(row => {
+    return {
+      start: DateTime.fromISO(row.group),
+      accruedDistance: row.sum,
+    }
+  })
+  const sortedWeeks = Z.sortByCol('start', 'asc', weeks)
+
+  // Calculate projected from previous weeks accrued
+  const accruedDistance = Z.getCol('accruedDistance', sortedWeeks)
+  const shiftedProjected = Z.cumulative(computeProjectedDistance(weeklyGain), accruedDistance)
+  const withProjected = Z.addCol('projectedDistance', shiftedProjected, sortedWeeks)
+
+  // Calculate remaining distance
+  const remainingDistance = Z.deriveCol((row) => row.projectedDistance - row.accruedDistance, withProjected)
+  const withRemaining = Z.addCol('remainingDistance', remainingDistance, withProjected)
+
+  // Show latest week first
+  return { weeks: Z.sortByCol('start', 'desc', withRemaining) }
+}
+
+
+//
 // Application
 //
 const buildApplication = ({runsRootPath}) => {
@@ -92,6 +167,19 @@ const buildApplication = ({runsRootPath}) => {
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify({runs: runs}))
+  })
+
+  app.get('/api/plan', async (req, res) => {
+    const runFilenames = await readdir(runsRootPath)
+    const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
+      const filePath = path.join(runsRootPath, filename)
+      return await extractSummary(filePath)
+    }))
+
+    const plan = computePlan(runs, WEEKLY_GAIN_MAX)
+
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify(plan))
   })
 
   app.use('/', express.static(path.join(__dirname, '../../dist/frontend/')))
