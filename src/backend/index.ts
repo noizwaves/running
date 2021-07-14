@@ -70,6 +70,7 @@ interface WeeklyPlan {
   accruedDistance: number
   projectedDistance: number
   remainingDistance: number
+  asThreeEqualRuns: number;
 }
 
 interface Plan {
@@ -80,10 +81,12 @@ const firstDayOfWeek = (run: RunSummary): string => {
   return run.startTime.startOf('week').toISO()
 }
 
-const addMissingWeeks = (incomplete) => {
+const addMissingWeeks = (planOutTo: typeof DateTime, incomplete) => {
   const dates = Z.getCol('group', incomplete)
   const start = DateTime.fromISO(dates[0])
-  const finish = DateTime.fromISO(dates[dates.length - 1])
+  const incompleteFinish = DateTime.fromISO(dates[dates.length - 1])
+  const planOutToFinish = planOutTo.startOf('week')
+  const finish = (planOutToFinish > incompleteFinish) ? planOutToFinish : incompleteFinish
 
   const missing = []
   let cursor = start
@@ -107,15 +110,24 @@ const computeProjectedDistance = (weeklyGain) => (accruedDistances) => {
   }
 }
 
-const computePlan = (runs: RunSummary[], weeklyGain: number): Plan => {
+const computePlan = (weeklyGain: number, planOutTo: typeof DateTime, runs: RunSummary[]): Plan => {
   const byWeeks = Z.groupBy(firstDayOfWeek, runs)
   const distanceByWeek = Z.gbSum('totalDistance', byWeeks)
-  const distanceByAllWeeks = addMissingWeeks(distanceByWeek)
+  const distanceByAllWeeks = addMissingWeeks(planOutTo, distanceByWeek)
+
+  // Get actual run distances
+  const actualRuns = {}
+  Object.entries(byWeeks).forEach(keyValue => {
+    const start: string = keyValue[0]
+    const rs: RunSummary[] = keyValue[1] as RunSummary[]
+    actualRuns[start] = rs.map(r => r.totalDistance)
+  })
 
   const weeks = distanceByAllWeeks.map(row => {
     return {
       start: DateTime.fromISO(row.group),
       accruedDistance: row.sum,
+      accruedRuns: actualRuns[row.group] || []
     }
   })
   const sortedWeeks = Z.sortByCol('start', 'asc', weeks)
@@ -129,8 +141,17 @@ const computePlan = (runs: RunSummary[], weeklyGain: number): Plan => {
   const remainingDistance = Z.deriveCol((row) => row.projectedDistance - row.accruedDistance, withProjected)
   const withRemaining = Z.addCol('remainingDistance', remainingDistance, withProjected)
 
+  // Calculate plan for 3 equal runs per week
+  const threeRatio = 1 + ((weeklyGain - 1) / 2)
+  const threeEqualRuns = Z.deriveCol((row) => [
+    (row.projectedDistance / 3) / threeRatio,
+    row.projectedDistance / 3,
+    (row.projectedDistance / 3) * threeRatio,
+  ], withProjected)
+  const withThreeEqualRuns = Z.addCol('asThreeEqualRuns', threeEqualRuns, withRemaining)
+
   // Show latest week first
-  return { weeks: Z.sortByCol('start', 'desc', withRemaining) }
+  return { weeks: Z.sortByCol('start', 'desc', withThreeEqualRuns) }
 }
 
 
@@ -176,7 +197,7 @@ const buildApplication = ({runsRootPath}) => {
       return await extractSummary(filePath)
     }))
 
-    const plan = computePlan(runs, WEEKLY_GAIN_MAX)
+    const plan = computePlan(WEEKLY_GAIN_MAX, DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(plan))
