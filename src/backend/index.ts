@@ -142,7 +142,7 @@ const computePlan = (weeklyGain: number, planOutTo: typeof DateTime, runs: RunSu
   const withRemaining = Z.addCol('remainingDistance', remainingDistance, withProjected)
 
   // Calculate plan for 3 equal runs per week
-  const threeRatio = 1 + ((weeklyGain - 1) / 2)
+  const threeRatio = 1 + ((weeklyGain - 1) / 3)
   const threeEqualRuns = Z.deriveCol((row) => [
     (row.projectedDistance / 3) / threeRatio,
     row.projectedDistance / 3,
