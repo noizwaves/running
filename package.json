@@ -7,7 +7,7 @@
     "scripts": {
         "build": "npm run build:frontend && npm run build:backend",
         "build:backend": "tsc",
-        "build:frontend": "parcel build -d dist/frontend src/frontend/index.html",
+        "build:frontend": "parcel build --no-minify -d dist/frontend src/frontend/index.html",
         "start": "node dist/backend/index.js",
         "dev:backend": "nodemon -e ts --exec \"ts-node src/backend/index.ts\"",
         "dev:frontend": "parcel watch -d dist/frontend src/frontend/index.html"
