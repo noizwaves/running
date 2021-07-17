@@ -3,8 +3,9 @@ import axios from 'axios'
 import {DateTime, Duration} from 'luxon'
 import {Link, NavLink, Route, Switch, useParams} from 'react-router-dom'
 import L from 'leaflet'
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet'
+import {MapContainer, TileLayer, Polyline} from 'react-leaflet'
 import {FlexibleWidthXYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
+import {ResponsiveLine} from '@nivo/line'
 
 //
 // Configure leaflet
@@ -230,7 +231,48 @@ const RunDetails = () => {
   )
 }
 
-const WeeklyDistanceTotalChart = ({actualData, projectedData}) => {
+const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
+  const data = [
+    {
+      id: 'actual',
+      data: actualData.map(({ date, distance }) => { return { x: DateTime.fromJSDate(date).toFormat('yyyy-MM-dd'), y: distance }}),
+    },
+    {
+      id: 'projected',
+      data: projectedData.map(({ date, distance }) => { return { x: DateTime.fromJSDate(date).toFormat('yyyy-MM-dd'), y: distance }})
+    },
+  ]
+
+  const yFormat = (value) => {
+    const numeral = (value / 1000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
+    return `${numeral} km`
+  }
+
+  return (
+    <div>
+      <h4>Weekly Total Distance</h4>
+      <div style={{height: 500}}>
+        <ResponsiveLine
+            data={data}
+            enableLabel={true}
+            isInteractive={true}
+            useMesh={true}
+            margin={{ top: 10, right: 60, bottom: 25, left: 45 }}
+            xScale={{type: 'time', format: '%Y-%m-%d'}}
+            xFormat="time:%Y-%m-%d"
+            yFormat={yFormat}
+            colors={['#9b4dca', '#ccc']}
+            axisTop={null}
+            axisRight={null}
+            axisBottom={{legendPosition: 'middle', legendOffset: 32, format: '%b %d'}}
+            axisLeft={{format: (v) => `${v/1000} km`, legendPosition: 'middle', legendOffset: -60}}
+        />
+      </div>
+    </div>
+  )
+}
+
+const ReactVisWeeklyDistanceTotalChart = ({actualData, projectedData}) => {
   return (
     <div>
       <h4>Weekly Total Distance</h4>
@@ -269,12 +311,12 @@ const PlanDetails = () => {
   const actualData = []
     .concat(pastWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.accruedDistance }}))
     .concat([{ date: currentWeek.start.toJSDate(), distance: currentWeek.projectedDistance }])
-  actualData.sort((a, b) => b.date - a.date)
+  actualData.sort((a, b) => a.date - b.date)
 
   const projectedData = []
     .concat([{ date: currentWeek.start.toJSDate(), distance: currentWeek.projectedDistance }])
     .concat(futureWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.projectedDistance}}))
-  projectedData.sort((a, b) => b.date - a.date)
+  projectedData.sort((a, b) => a.date - b.date)
 
   return (
     <div className="container">
@@ -305,7 +347,8 @@ const PlanDetails = () => {
           </dl>
         </div>
       </div>
-      <WeeklyDistanceTotalChart actualData={actualData} projectedData={projectedData} />
+      <NivoLineWeeklyDistanceTotalChart actualData={actualData} projectedData={projectedData} />
+      <ReactVisWeeklyDistanceTotalChart actualData={actualData} projectedData={projectedData} />
     </div>
   )
 }
