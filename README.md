@@ -5,7 +5,7 @@ Lightweight fitness tracking app for runners.
 ## Dependencies
 
 Dependencies are managed by [asdf](https://asdf-vm.com/#/)
-1.  NodeJS
+1.  NodeJS (using the plugin: `$ asdf plugin add nodejs`)
 
 ## Getting started
 
