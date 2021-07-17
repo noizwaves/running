@@ -132,8 +132,11 @@ const RunList = () => {
           <td>
             <Link to={`/runs/${run.id}`}>{run.startTime.toFormat('ccc, M/d/yyyy')}</Link>
           </td>
-          <td><DurationValue value={run.totalTime} /></td>
           <td><DistanceValue value={run.totalDistance} /></td>
+          <td>{run.avgCadence}</td>
+          <td><DurationValue value={run.totalTime} /></td>
+          <td><PaceValue speedValue={run.avgSpeed} /></td>
+          <td>{run.avgHeartRate}</td>
         </tr>
       )
     })
@@ -145,8 +148,11 @@ const RunList = () => {
         <thead>
           <tr>
             <th>Date</th>
-            <th>Time</th>
             <th>Distance</th>
+            <th>Cadence</th>
+            <th>Time</th>
+            <th>Pace</th>
+            <th>Heart Rate</th>
           </tr>
         </thead>
         <tbody>
