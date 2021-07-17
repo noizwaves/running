@@ -23,6 +23,7 @@ L.Icon.Default.mergeOptions({
 //
 import 'leaflet/dist/leaflet.css'
 import 'react-vis/dist/style'
+import 'milligram/dist/milligram.css'
 
 //
 // Core utilties
@@ -147,7 +148,8 @@ const RunList = () => {
   }
 
   return (
-    <div>
+    <div className="container">
+      <h3>Runs</h3>
       {renderRuns()}
     </div>
   )
@@ -175,11 +177,13 @@ const RunDetails = () => {
   const lineOptions = { color: 'red' }
 
   return (
-    <div>
-      <h2>{id}</h2>
-      <span>
-        {summary.startTime.toFormat("h:mm a 'on' cccc, LLLL d, yyyy")}
-      </span>
+    <div className="container">
+      <div>
+        <h2>{id}</h2>
+        <span>
+          {summary.startTime.toFormat("h:mm a 'on' cccc, LLLL d, yyyy")}
+        </span>
+      </div>
       <dl>
         <dt>Distance</dt>
         <dd><DistanceValue value={summary.totalDistance} /></dd>
@@ -248,9 +252,9 @@ const PlanDetails = () => {
   projectedData.sort((a, b) => b.date - a.date)
 
   return (
-    <div>
+    <div class="container">
       <div>
-        <span>Current Week</span>
+        <h3>Current Week</h3>
         <dl>
           <dt>Projected Distance</dt>
           <dd><DistanceValue value={currentWeek.projectedDistance} /></dd>
@@ -265,7 +269,7 @@ const PlanDetails = () => {
         </dl>
       </div>
       <div>
-        <span>Weekly Total Distance</span>
+        <h3>Weekly Total Distance</h3>
         <div style={{height: 600}}>
         <FlexibleWidthXYPlot height={600} xType="time" getX={d => d.date} getY={d => d.distance}>
           <HorizontalGridLines />
