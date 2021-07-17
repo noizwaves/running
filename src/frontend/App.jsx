@@ -53,12 +53,37 @@ const parseRuns = (raw) => {
   })
 }
 
+const parsePlan = ({currentWeek, pastWeeks, futureWeeks}) => {
+  return {
+    currentWeek: {...currentWeek, start: DateTime.fromISO(currentWeek.start)},
+    pastWeeks: pastWeeks.map(w => { return { ...w, start: DateTime.fromISO(w.start) }}),
+    futureWeeks: futureWeeks.map(w => { return { ...w, start: DateTime.fromISO(w.start) }}),
+  }
+}
+
 //
 // Measurements
 //
 const DistanceValue = ({value}) => {
   const numeral = (value / 1000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
   return (`${numeral} km`)
+}
+
+const DistancesValues = ({values}) => {
+  if (values.length === 0) {
+    return (
+      'none'
+    )
+  } else {
+    return values.map((value, index) => {
+      return (
+        <>
+          <DistanceValue value={value} />
+          {(index != values.length - 1) ? ', ' : ''}
+        </>
+      )
+    })
+  }
 }
 
 const DurationValue = ({value}) => {
@@ -194,9 +219,73 @@ const RunDetails = () => {
   )
 }
 
+const PlanDetails = () => {
+  const [plan, setPlan] = React.useState(null)
+
+  React.useEffect(() => {
+    axios.get(`/api/plan`)
+      .then(response => {
+        setPlan(parsePlan(response.data))
+      })
+  }, [])
+
+  if (!plan) {
+    return (
+      <div>Loading...</div>
+    )
+  }
+
+  const { currentWeek, pastWeeks, futureWeeks } = plan
+
+  const actualData = []
+    .concat(pastWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.accruedDistance }}))
+    .concat([{ date: currentWeek.start.toJSDate(), distance: currentWeek.projectedDistance }])
+  actualData.sort((a, b) => b.date - a.date)
+
+  const projectedData = []
+    .concat([{ date: currentWeek.start.toJSDate(), distance: currentWeek.projectedDistance }])
+    .concat(futureWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.projectedDistance}}))
+  projectedData.sort((a, b) => b.date - a.date)
+
+  return (
+    <div>
+      <div>
+        <span>Current Week</span>
+        <dl>
+          <dt>Projected Distance</dt>
+          <dd><DistanceValue value={currentWeek.projectedDistance} /></dd>
+          <dt>As Three Runs</dt>
+          <dd><DistancesValues values={currentWeek.asThreeRuns} /></dd>
+          <dt>Accrued Runs</dt>
+          <dd><DistancesValues values={currentWeek.accruedRuns} /></dd>
+          <dt>Accrued Distance</dt>
+          <dd><DistanceValue value={currentWeek.accruedDistance} /></dd>
+          <dt>Remaining Distance</dt>
+          <dd><DistanceValue value={currentWeek.remainingDistance} /></dd>
+        </dl>
+      </div>
+      <div>
+        <span>Weekly Total Distance</span>
+        <div style={{height: 600}}>
+        <FlexibleWidthXYPlot height={600} xType="time" getX={d => d.date} getY={d => d.distance}>
+          <HorizontalGridLines />
+          <LineSeries data={actualData} color='green' />
+          <LineSeries data={projectedData} color='grey' strokeStyle='dashed' />
+          <XAxis />
+          <YAxis left='10' tickFormat={(v) => `${v/1000}km`} />
+        </FlexibleWidthXYPlot>
+      </div>
+      </div>
+    </div>
+  )
+}
+
 const App = () => {
   return (
     <Switch>
+      <Route path="/plan">
+        <PlanDetails />
+      </Route>
       <Route path="/runs/:id">
         <RunDetails></RunDetails>
       </Route>
