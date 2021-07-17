@@ -255,6 +255,13 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
     return `${numeral} km`
   }
 
+  const xFormat = (startOfWeekDate) => {
+    const format = 'LLL d'
+    const start = DateTime.fromJSDate(startOfWeekDate)
+    const end = start.plus({days: 1}).endOf('week')
+    return `${start.toFormat(format)} - ${end.toFormat(format)}`
+  }
+
   return (
     <div>
       <h4>Weekly Total Distance</h4>
@@ -266,7 +273,7 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
             useMesh={true}
             margin={{ top: 10, right: 60, bottom: 35, left: 55 }}
             xScale={{type: 'time', format: '%Y-%m-%d'}}
-            xFormat="time:%Y-%m-%d"
+            xFormat={xFormat}
             yFormat={yFormat}
             colors={['#9b4dca', '#ccc']}
             axisTop={null}
