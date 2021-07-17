@@ -65,8 +65,6 @@ const extractDetails = async (filePath: string) => {
 //
 const WEEKLY_GAIN_MAX = 1.1
 
-const WEEKS_PROJECTED = 26
-
 interface CurrentWeek {
   start: typeof DateTime
   accruedRuns: number[]
@@ -245,13 +243,18 @@ const buildApplication = ({runsRootPath}) => {
   })
 
   app.get('/api/plan', async (req, res) => {
+    // Parse request parameters
+    const weeksProjected: number = parseInt(req.query.projectForwardWeeks)
+
+    // Prepare input data for plan
     const runFilenames = await readdir(runsRootPath)
     const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
       const filePath = path.join(runsRootPath, filename)
       return await extractSummary(filePath)
     }))
 
-    const plan = computePlan(WEEKLY_GAIN_MAX, WEEKS_PROJECTED, DateTime.now(), runs)
+    // Compute the plan
+    const plan = computePlan(WEEKLY_GAIN_MAX, weeksProjected, DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(plan))
