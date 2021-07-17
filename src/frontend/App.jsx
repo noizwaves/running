@@ -78,10 +78,10 @@ const DistancesValues = ({values}) => {
   } else {
     return values.map((value, index) => {
       return (
-        <>
+        <span key={index}>
           <DistanceValue value={value} />
           {(index != values.length - 1) ? ', ' : ''}
-        </>
+        </span>
       )
     })
   }
