@@ -1,7 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 import {DateTime, Duration} from 'luxon'
-import {Link, Route, Switch, useParams} from 'react-router-dom'
+import {Link, NavLink, Route, Switch, useParams} from 'react-router-dom'
 import L from 'leaflet'
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet'
 import {FlexibleWidthXYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
@@ -253,8 +253,9 @@ const PlanDetails = () => {
 
   return (
     <div class="container">
+      <h3>Plan</h3>
       <div>
-        <h3>Current Week</h3>
+        <h4>Current Week</h4>
         <dl>
           <dt>Projected Distance</dt>
           <dd><DistanceValue value={currentWeek.projectedDistance} /></dd>
@@ -269,16 +270,16 @@ const PlanDetails = () => {
         </dl>
       </div>
       <div>
-        <h3>Weekly Total Distance</h3>
+        <h4>Weekly Total Distance</h4>
         <div style={{height: 600}}>
-        <FlexibleWidthXYPlot height={600} xType="time" getX={d => d.date} getY={d => d.distance}>
-          <HorizontalGridLines />
-          <LineSeries data={actualData} color='green' />
-          <LineSeries data={projectedData} color='grey' strokeStyle='dashed' />
-          <XAxis />
-          <YAxis left='10' tickFormat={(v) => `${v/1000}km`} />
-        </FlexibleWidthXYPlot>
-      </div>
+          <FlexibleWidthXYPlot height={600} xType="time" getX={d => d.date} getY={d => d.distance}>
+            <HorizontalGridLines />
+            <LineSeries data={actualData} color='green' />
+            <LineSeries data={projectedData} color='grey' strokeStyle='dashed' />
+            <XAxis />
+            <YAxis left='10' tickFormat={(v) => `${v/1000}km`} />
+          </FlexibleWidthXYPlot>
+        </div>
       </div>
     </div>
   )
@@ -286,17 +287,25 @@ const PlanDetails = () => {
 
 const App = () => {
   return (
-    <Switch>
-      <Route path="/plan">
-        <PlanDetails />
-      </Route>
-      <Route path="/runs/:id">
-        <RunDetails></RunDetails>
-      </Route>
-      <Route path="/">
-        <RunList></RunList>
-      </Route>
-    </Switch>
+    <>
+      <header>
+        <nav class='container'>
+          <NavLink to='/' className="button button-clear">Runs</NavLink>
+          <NavLink to='/plan' className="button button-clear">Plan</NavLink>
+        </nav>
+      </header>
+      <Switch>
+        <Route path="/plan">
+          <PlanDetails />
+        </Route>
+        <Route path="/runs/:id">
+          <RunDetails></RunDetails>
+        </Route>
+        <Route path="/">
+          <RunList></RunList>
+        </Route>
+      </Switch>
+    </>
   )
 }
 
