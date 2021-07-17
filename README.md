@@ -7,6 +7,10 @@ Lightweight fitness tracking app for runners.
 Dependencies are managed by [asdf](https://asdf-vm.com/#/)
 1.  NodeJS (using the plugin: `$ asdf plugin add nodejs`)
 
+## System Dependencies (macOS)
+
+1. Command Line Tools: `$ xcode-select --install`
+
 ## Getting started
 
 1.  `$ asdf install`
