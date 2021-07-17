@@ -125,13 +125,22 @@ const addMissingWeeks = (planOutTo: typeof DateTime, incomplete) => {
 }
 
 // TODO: enhance to work with weeks w/ 0 accrued
-const computeProjectedDistance = (weeklyGain) => (accruedDistances) => {
+const computeProjectedDistance = (weeklyGain: number) => (accruedDistances) => {
   if (accruedDistances.length >= 2) {
     const previousAccrued = accruedDistances[accruedDistances.length - 2]
     return previousAccrued * weeklyGain
   } else {
     return 0
   }
+}
+
+const computeThreeRunApproach = (weeklyGain: number) => (row: {projectedDistance: number}) => {
+  const threeRunRatio = 1 + ((weeklyGain - 1) / 3)
+  return [
+    (row.projectedDistance / 3) / threeRunRatio,
+    row.projectedDistance / 3,
+    (row.projectedDistance / 3) * threeRunRatio,
+  ]
 }
 
 const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProjected: number) => {
@@ -145,14 +154,7 @@ const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProje
     })
   }
 
-  const threeRunRatio = 1 + ((weeklyGain - 1) / 3)
-  const threeRuns = Z.deriveCol((row) => {
-    return [
-      (row.projectedDistance / 3) / threeRunRatio,
-      row.projectedDistance / 3,
-      (row.projectedDistance / 3) * threeRunRatio,
-    ]
-  }, withProjectedDistance)
+  const threeRuns = Z.deriveCol(computeThreeRunApproach(weeklyGain), withProjectedDistance)
   const withThreeRuns = Z.addCol('asThreeRuns', threeRuns, withProjectedDistance)
 
   return withThreeRuns
@@ -195,15 +197,8 @@ const computePlan = (weeklyGain: number, weeksProjected: number, now: typeof Dat
   const currentWeek = Z.head(1, allWeeks)[0]
   const pastWeeks = Z.tail(allWeeks.length - 1, allWeeks)
 
-  // TODO: apply plan onto to current week
-  // Calculate plan for 3 equal runs per week
-  const threeRatio = 1 + ((weeklyGain - 1) / 3)
-  const threeEqualRuns = [
-    (currentWeek.projectedDistance / 3) / threeRatio,
-    currentWeek.projectedDistance / 3,
-    (currentWeek.projectedDistance / 3) * threeRatio,
-  ]
-  currentWeek.asThreeRuns = threeEqualRuns
+  // TODO: make this less mutation-y
+  currentWeek.asThreeRuns = computeThreeRunApproach(weeklyGain)(currentWeek)
 
   // Show latest week first
   return {
