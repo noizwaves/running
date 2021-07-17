@@ -65,14 +65,7 @@ const extractDetails = async (filePath: string) => {
 //
 const WEEKLY_GAIN_MAX = 1.1
 
-interface PastWeek {
-  start: typeof DateTime
-  accruedRuns: number[]
-
-  accruedDistance: number
-  projectedDistance: number
-  remainingDistance: number
-}
+const WEEKS_PROJECTED = 26
 
 interface CurrentWeek {
   start: typeof DateTime
@@ -85,9 +78,27 @@ interface CurrentWeek {
   asThreeEqualRuns: number[]
 }
 
+interface PastWeek {
+  start: typeof DateTime
+  accruedRuns: number[]
+
+  accruedDistance: number
+  projectedDistance: number
+  remainingDistance: number
+}
+
+interface FutureWeek {
+  start: typeof DateTime
+
+  projectedDistance: number
+
+  asThreeEqualRuns: number[]
+}
+
 interface Plan {
   currentWeek: CurrentWeek
   pastWeeks: PastWeek[]
+  futureWeeks: FutureWeek[]
 }
 
 const firstDayOfWeek = (run: RunSummary): string => {
@@ -123,7 +134,31 @@ const computeProjectedDistance = (weeklyGain) => (accruedDistances) => {
   }
 }
 
-const computePlan = (weeklyGain: number, now: typeof DateTime, runs: RunSummary[]): Plan => {
+const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProjected: number) => {
+  // determine future week start dates
+  // TODO: make less mutation-y
+  const withProjectedDistance = []
+  for (let i = 1; i <= weeksProjected; i++) {
+    withProjectedDistance.push({
+      start: current.start.plus({weeks: i}),
+      projectedDistance: current.projectedDistance * Math.pow(weeklyGain, i),
+    })
+  }
+
+  const threeRatio = 1 + ((weeklyGain - 1) / 3)
+  const threeEqualRuns = Z.deriveCol((row) => {
+    return [
+      (row.projectedDistance / 3) / threeRatio,
+      row.projectedDistance / 3,
+      (row.projectedDistance / 3) * threeRatio,
+    ]
+  }, withProjectedDistance)
+  const withThreeEqualRuns = Z.addCol('asThreeEqualRuns', threeEqualRuns, withProjectedDistance)
+
+  return withThreeEqualRuns
+}
+
+const computePlan = (weeklyGain: number, weeksProjected: number, now: typeof DateTime, runs: RunSummary[]): Plan => {
   const byWeeks = Z.groupBy(firstDayOfWeek, runs)
   const distanceByWeek = Z.gbSum('totalDistance', byWeeks)
   const distanceByAllWeeks = addMissingWeeks(now, distanceByWeek)
@@ -174,6 +209,7 @@ const computePlan = (weeklyGain: number, now: typeof DateTime, runs: RunSummary[
   return {
     currentWeek: currentWeek,
     pastWeeks: pastWeeks,
+    futureWeeks: projectFutureWeeks(currentWeek, weeklyGain, weeksProjected),
    }
 }
 
@@ -220,7 +256,7 @@ const buildApplication = ({runsRootPath}) => {
       return await extractSummary(filePath)
     }))
 
-    const plan = computePlan(WEEKLY_GAIN_MAX, DateTime.now(), runs)
+    const plan = computePlan(WEEKLY_GAIN_MAX, WEEKS_PROJECTED, DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(plan))
