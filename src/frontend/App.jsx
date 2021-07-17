@@ -285,15 +285,21 @@ const PlanDetails = () => {
   )
 }
 
+const NavigationBar = () => {
+  return (
+    <header>
+      <nav class='container'>
+        <NavLink to='/' className="button button-clear">Runs</NavLink>
+        <NavLink to='/plan' className="button button-clear">Plan</NavLink>
+      </nav>
+    </header>
+  )
+}
+
 const App = () => {
   return (
     <>
-      <header>
-        <nav class='container'>
-          <NavLink to='/' className="button button-clear">Runs</NavLink>
-          <NavLink to='/plan' className="button button-clear">Plan</NavLink>
-        </nav>
-      </header>
+      <NavigationBar />
       <Switch>
         <Route path="/plan">
           <PlanDetails />
