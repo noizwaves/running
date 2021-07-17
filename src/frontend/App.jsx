@@ -273,23 +273,6 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
   )
 }
 
-const ReactVisWeeklyDistanceTotalChart = ({actualData, projectedData}) => {
-  return (
-    <div>
-      <h4>Weekly Total Distance</h4>
-      <div style={{height: 600}}>
-        <FlexibleWidthXYPlot height={600} xType="time" getX={d => d.date} getY={d => d.distance}>
-          <HorizontalGridLines />
-          <LineSeries data={actualData} color='green' />
-          <LineSeries data={projectedData} color='grey' strokeStyle='dashed' />
-          <XAxis />
-          <YAxis left={10} tickFormat={(v) => `${v/1000}km`} />
-        </FlexibleWidthXYPlot>
-      </div>
-    </div>
-  )
-}
-
 const PlanDetails = () => {
   const [plan, setPlan] = React.useState(null)
   const [projectForwardWeeks, setProjectForward] = React.useState(26)
@@ -365,7 +348,6 @@ const PlanDetails = () => {
           </form>
         </div>
       </div>
-      <ReactVisWeeklyDistanceTotalChart actualData={actualData} projectedData={projectedData} />
     </div>
   )
 }
