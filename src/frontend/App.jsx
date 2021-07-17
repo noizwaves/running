@@ -296,7 +296,7 @@ const PlanDetails = () => {
             <LineSeries data={actualData} color='green' />
             <LineSeries data={projectedData} color='grey' strokeStyle='dashed' />
             <XAxis />
-            <YAxis left='10' tickFormat={(v) => `${v/1000}km`} />
+            <YAxis left={10} tickFormat={(v) => `${v/1000}km`} />
           </FlexibleWidthXYPlot>
         </div>
       </div>
