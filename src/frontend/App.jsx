@@ -230,6 +230,23 @@ const RunDetails = () => {
   )
 }
 
+const WeeklyDistanceTotalChart = ({actualData, projectedData}) => {
+  return (
+    <div>
+      <h4>Weekly Total Distance</h4>
+      <div style={{height: 600}}>
+        <FlexibleWidthXYPlot height={600} xType="time" getX={d => d.date} getY={d => d.distance}>
+          <HorizontalGridLines />
+          <LineSeries data={actualData} color='green' />
+          <LineSeries data={projectedData} color='grey' strokeStyle='dashed' />
+          <XAxis />
+          <YAxis left={10} tickFormat={(v) => `${v/1000}km`} />
+        </FlexibleWidthXYPlot>
+      </div>
+    </div>
+  )
+}
+
 const PlanDetails = () => {
   const [plan, setPlan] = React.useState(null)
 
@@ -288,22 +305,14 @@ const PlanDetails = () => {
           </dl>
         </div>
       </div>
-      <div>
-        <h4>Weekly Total Distance</h4>
-        <div style={{height: 600}}>
-          <FlexibleWidthXYPlot height={600} xType="time" getX={d => d.date} getY={d => d.distance}>
-            <HorizontalGridLines />
-            <LineSeries data={actualData} color='green' />
-            <LineSeries data={projectedData} color='grey' strokeStyle='dashed' />
-            <XAxis />
-            <YAxis left={10} tickFormat={(v) => `${v/1000}km`} />
-          </FlexibleWidthXYPlot>
-        </div>
-      </div>
+      <WeeklyDistanceTotalChart actualData={actualData} projectedData={projectedData} />
     </div>
   )
 }
 
+//
+// App
+//
 const NavigationBar = () => {
   return (
     <header>
