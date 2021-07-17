@@ -110,7 +110,7 @@ const WeeklyRange = ({date}) => {
 // Pages
 //
 const RunList = () => {
-  const [runs, setRuns] = React.useState([])
+  const [runs, setRuns] = React.useState(null)
 
   React.useEffect(() => {
     axios.get('/api/runs')
@@ -119,9 +119,10 @@ const RunList = () => {
       })
   }, [])
 
-  const renderDuration = (totalTime) => {
-    const duration = Duration.fromObject({seconds: totalTime})
-    return duration.toFormat('mm:ss')
+  if (!runs) {
+    return (
+      <div className="container">Loading...</div>
+    )
   }
 
   const renderRunRows = () => {
@@ -176,7 +177,7 @@ const RunDetails = () => {
 
   if (!details) {
     return (
-      <div>Loading...</div>
+      <div className="container">Loading...</div>
     )
   }
 
@@ -257,7 +258,7 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
             enableLabel={true}
             isInteractive={true}
             useMesh={true}
-            margin={{ top: 10, right: 60, bottom: 25, left: 55 }}
+            margin={{ top: 10, right: 60, bottom: 35, left: 55 }}
             xScale={{type: 'time', format: '%Y-%m-%d'}}
             xFormat="time:%Y-%m-%d"
             yFormat={yFormat}
@@ -302,7 +303,7 @@ const PlanDetails = () => {
 
   if (!plan) {
     return (
-      <div>Loading...</div>
+      <div className="container">Loading...</div>
     )
   }
 
@@ -322,21 +323,6 @@ const PlanDetails = () => {
   return (
     <div className="container">
       <h3>Plan</h3>
-      <div className="row">
-        <div className="column">
-          <form>
-            <fieldset>
-              <label for="projectForwardWeeks">Project Forward (Weeks)</label>
-              <select id="projectForwardWeeks" value={projectForwardWeeks} onChange={(e) => setProjectForward(e.target.value)}>
-                <option value={13}>3 months</option>
-                <option value={26}>6 months</option>
-                <option value={39}>9 months</option>
-                <option value={52}>12 months</option>
-              </select>
-            </fieldset>
-          </form>
-        </div>
-      </div>
       <div className="row">
         <div className="column">
           <h4>Current Week (<WeeklyRange date={currentWeek.start} />)</h4>
@@ -364,6 +350,21 @@ const PlanDetails = () => {
         </div>
       </div>
       <NivoLineWeeklyDistanceTotalChart actualData={actualData} projectedData={projectedData} />
+      <div className="row">
+        <div className="column">
+          <form>
+            <fieldset>
+              <label for="projectForwardWeeks">Project Forward (Weeks)</label>
+              <select id="projectForwardWeeks" value={projectForwardWeeks} onChange={(e) => setProjectForward(e.target.value)}>
+                <option value={13}>3 months</option>
+                <option value={26}>6 months</option>
+                <option value={39}>9 months</option>
+                <option value={52}>12 months</option>
+              </select>
+            </fieldset>
+          </form>
+        </div>
+      </div>
       <ReactVisWeeklyDistanceTotalChart actualData={actualData} projectedData={projectedData} />
     </div>
   )
