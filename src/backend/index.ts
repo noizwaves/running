@@ -65,16 +65,29 @@ const extractDetails = async (filePath: string) => {
 //
 const WEEKLY_GAIN_MAX = 1.1
 
-interface WeeklyPlan {
+interface PastWeek {
   start: typeof DateTime
+  accruedRuns: number[]
+
   accruedDistance: number
   projectedDistance: number
   remainingDistance: number
-  asThreeEqualRuns: number;
+}
+
+interface CurrentWeek {
+  start: typeof DateTime
+  accruedRuns: number[]
+  accruedDistance: number
+
+  projectedDistance: number
+  remainingDistance: number
+
+  asThreeEqualRuns: number[]
 }
 
 interface Plan {
-  weeks: WeeklyPlan[]
+  currentWeek: CurrentWeek
+  pastWeeks: PastWeek[]
 }
 
 const firstDayOfWeek = (run: RunSummary): string => {
@@ -110,10 +123,10 @@ const computeProjectedDistance = (weeklyGain) => (accruedDistances) => {
   }
 }
 
-const computePlan = (weeklyGain: number, planOutTo: typeof DateTime, runs: RunSummary[]): Plan => {
+const computePlan = (weeklyGain: number, now: typeof DateTime, runs: RunSummary[]): Plan => {
   const byWeeks = Z.groupBy(firstDayOfWeek, runs)
   const distanceByWeek = Z.gbSum('totalDistance', byWeeks)
-  const distanceByAllWeeks = addMissingWeeks(planOutTo, distanceByWeek)
+  const distanceByAllWeeks = addMissingWeeks(now, distanceByWeek)
 
   // Get actual run distances
   const actualRuns = {}
@@ -141,17 +154,27 @@ const computePlan = (weeklyGain: number, planOutTo: typeof DateTime, runs: RunSu
   const remainingDistance = Z.deriveCol((row) => row.projectedDistance - row.accruedDistance, withProjected)
   const withRemaining = Z.addCol('remainingDistance', remainingDistance, withProjected)
 
+  // All current runs captured here
+  const allWeeks = Z.sortByCol('start', 'desc', withRemaining)
+
+  const currentWeek = Z.head(1, allWeeks)[0]
+  const pastWeeks = Z.tail(allWeeks.length - 1, allWeeks)
+
+  // TODO: apply plan onto to current week
   // Calculate plan for 3 equal runs per week
   const threeRatio = 1 + ((weeklyGain - 1) / 3)
-  const threeEqualRuns = Z.deriveCol((row) => [
-    (row.projectedDistance / 3) / threeRatio,
-    row.projectedDistance / 3,
-    (row.projectedDistance / 3) * threeRatio,
-  ], withProjected)
-  const withThreeEqualRuns = Z.addCol('asThreeEqualRuns', threeEqualRuns, withRemaining)
+  const threeEqualRuns = [
+    (currentWeek.projectedDistance / 3) / threeRatio,
+    currentWeek.projectedDistance / 3,
+    (currentWeek.projectedDistance / 3) * threeRatio,
+  ]
+  currentWeek.asThreeEqualRuns = threeEqualRuns
 
   // Show latest week first
-  return { weeks: Z.sortByCol('start', 'desc', withThreeEqualRuns) }
+  return {
+    currentWeek: currentWeek,
+    pastWeeks: pastWeeks,
+   }
 }
 
 
