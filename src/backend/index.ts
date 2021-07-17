@@ -75,7 +75,7 @@ interface CurrentWeek {
   projectedDistance: number
   remainingDistance: number
 
-  asThreeEqualRuns: number[]
+  asThreeRuns: number[]
 }
 
 interface PastWeek {
@@ -92,7 +92,7 @@ interface FutureWeek {
 
   projectedDistance: number
 
-  asThreeEqualRuns: number[]
+  asThreeRuns: number[]
 }
 
 interface Plan {
@@ -145,17 +145,17 @@ const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProje
     })
   }
 
-  const threeRatio = 1 + ((weeklyGain - 1) / 3)
-  const threeEqualRuns = Z.deriveCol((row) => {
+  const threeRunRatio = 1 + ((weeklyGain - 1) / 3)
+  const threeRuns = Z.deriveCol((row) => {
     return [
-      (row.projectedDistance / 3) / threeRatio,
+      (row.projectedDistance / 3) / threeRunRatio,
       row.projectedDistance / 3,
-      (row.projectedDistance / 3) * threeRatio,
+      (row.projectedDistance / 3) * threeRunRatio,
     ]
   }, withProjectedDistance)
-  const withThreeEqualRuns = Z.addCol('asThreeEqualRuns', threeEqualRuns, withProjectedDistance)
+  const withThreeRuns = Z.addCol('asThreeRuns', threeRuns, withProjectedDistance)
 
-  return withThreeEqualRuns
+  return withThreeRuns
 }
 
 const computePlan = (weeklyGain: number, weeksProjected: number, now: typeof DateTime, runs: RunSummary[]): Plan => {
@@ -203,7 +203,7 @@ const computePlan = (weeklyGain: number, weeksProjected: number, now: typeof Dat
     currentWeek.projectedDistance / 3,
     (currentWeek.projectedDistance / 3) * threeRatio,
   ]
-  currentWeek.asThreeEqualRuns = threeEqualRuns
+  currentWeek.asThreeRuns = threeEqualRuns
 
   // Show latest week first
   return {
