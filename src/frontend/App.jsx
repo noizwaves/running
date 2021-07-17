@@ -98,6 +98,13 @@ const PaceValue = ({speedValue}) => {
   return `${formatted.toFormat('m:ss')} /km`
 }
 
+const WeeklyRange = ({date}) => {
+  const format = 'LLL d'
+  const start = date.startOf('week')
+  const end = date.endOf('week')
+  return `${start.toFormat(format)} - ${end.toFormat(format)}`
+}
+
 //
 // Pages
 //
@@ -240,6 +247,7 @@ const PlanDetails = () => {
   }
 
   const { currentWeek, pastWeeks, futureWeeks } = plan
+  const nextWeek = futureWeeks[0]
 
   const actualData = []
     .concat(pastWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.accruedDistance }}))
@@ -254,20 +262,31 @@ const PlanDetails = () => {
   return (
     <div class="container">
       <h3>Plan</h3>
-      <div>
-        <h4>Current Week</h4>
-        <dl>
-          <dt>Projected Distance</dt>
-          <dd><DistanceValue value={currentWeek.projectedDistance} /></dd>
-          <dt>As Three Runs</dt>
-          <dd><DistancesValues values={currentWeek.asThreeRuns} /></dd>
-          <dt>Accrued Runs</dt>
-          <dd><DistancesValues values={currentWeek.accruedRuns} /></dd>
-          <dt>Accrued Distance</dt>
-          <dd><DistanceValue value={currentWeek.accruedDistance} /></dd>
-          <dt>Remaining Distance</dt>
-          <dd><DistanceValue value={currentWeek.remainingDistance} /></dd>
-        </dl>
+      <div class="row">
+        <div class="column">
+          <h4>Current Week (<WeeklyRange date={currentWeek.start} />)</h4>
+          <dl>
+            <dt>Projected Distance</dt>
+            <dd><DistanceValue value={currentWeek.projectedDistance} /></dd>
+            <dt>As Three Runs</dt>
+            <dd><DistancesValues values={currentWeek.asThreeRuns} /></dd>
+            <dt>Accrued Runs</dt>
+            <dd><DistancesValues values={currentWeek.accruedRuns} /></dd>
+            <dt>Accrued Distance</dt>
+            <dd><DistanceValue value={currentWeek.accruedDistance} /></dd>
+            <dt>Remaining Distance</dt>
+            <dd><DistanceValue value={currentWeek.remainingDistance} /></dd>
+          </dl>
+        </div>
+        <div class="column">
+          <h4>Next Week (<WeeklyRange date={nextWeek.start} />)</h4>
+          <dl>
+            <dt>Projected Distance</dt>
+            <dd><DistanceValue value={nextWeek.projectedDistance} /></dd>
+            <dt>As Three Runs</dt>
+            <dd><DistancesValues values={nextWeek.asThreeRuns} /></dd>
+          </dl>
+        </div>
       </div>
       <div>
         <h4>Weekly Total Distance</h4>
