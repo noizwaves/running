@@ -260,10 +260,10 @@ const PlanDetails = () => {
   projectedData.sort((a, b) => b.date - a.date)
 
   return (
-    <div class="container">
+    <div className="container">
       <h3>Plan</h3>
-      <div class="row">
-        <div class="column">
+      <div className="row">
+        <div className="column">
           <h4>Current Week (<WeeklyRange date={currentWeek.start} />)</h4>
           <dl>
             <dt>Projected Distance</dt>
@@ -278,7 +278,7 @@ const PlanDetails = () => {
             <dd><DistanceValue value={currentWeek.remainingDistance} /></dd>
           </dl>
         </div>
-        <div class="column">
+        <div className="column">
           <h4>Next Week (<WeeklyRange date={nextWeek.start} />)</h4>
           <dl>
             <dt>Projected Distance</dt>
@@ -307,7 +307,7 @@ const PlanDetails = () => {
 const NavigationBar = () => {
   return (
     <header>
-      <nav class='container'>
+      <nav className='container'>
         <NavLink to='/' className="button button-clear">Runs</NavLink>
         <NavLink to='/plan' className="button button-clear">Plan</NavLink>
       </nav>
