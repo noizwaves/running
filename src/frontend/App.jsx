@@ -271,7 +271,7 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
             enableLabel={true}
             isInteractive={true}
             useMesh={true}
-            margin={{ top: 10, right: 60, bottom: 35, left: 55 }}
+            margin={{ top: 10, right: 60, bottom: 35, left: 65 }}
             xScale={{type: 'time', format: '%Y-%m-%d'}}
             xFormat={xFormat}
             yFormat={yFormat}
@@ -289,13 +289,14 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
 const PlanDetails = () => {
   const [plan, setPlan] = React.useState(null)
   const [projectForwardWeeks, setProjectForward] = React.useState(26)
+  const [weeklyDistanceGain, setWeeklyDistanceGain] = React.useState(0.1)
 
   React.useEffect(() => {
-    axios.get(`/api/plan?projectForwardWeeks=${projectForwardWeeks}`)
+    axios.get(`/api/plan?projectForwardWeeks=${projectForwardWeeks}&weeklyDistanceGain=${weeklyDistanceGain}`)
       .then(response => {
         setPlan(parsePlan(response.data))
       })
-  }, [projectForwardWeeks])
+  }, [projectForwardWeeks, weeklyDistanceGain])
 
   if (!plan) {
     return (
@@ -315,6 +316,48 @@ const PlanDetails = () => {
     .concat([{ date: currentWeek.start.toJSDate(), distance: currentWeek.projectedDistance }])
     .concat(futureWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.projectedDistance}}))
   projectedData.sort((a, b) => a.date - b.date)
+
+  const renderProjectForwardWeeks = () => {
+    const optionData = [
+      [13, '3 months'],
+      [26, '6 months'],
+      [39, '9 months'],
+      [52, '12 months'],
+    ]
+
+    const options = optionData.map(
+      ([value, text]) => <option value={value}>{text}</option>
+    )
+
+    return (
+      <>
+        <label for="projectForwardWeeks">Project Forward (Weeks)</label>
+        <select id="projectForwardWeeks" value={projectForwardWeeks} onChange={(e) => setProjectForward(e.target.value)}>
+          {options}
+        </select>
+      </>
+    )
+  }
+
+  const renderWeeklyDistanceGain = () => {
+    const optionData = [
+      [0.1, '10%'],
+      [0.331, '33.1%'],
+    ]
+
+    const options = optionData.map(
+      ([value, text]) => <option value={value}>{text}</option>
+    )
+
+    return (
+      <>
+        <label for="weeklyDistanceGain">Weekly Distance Gain</label>
+        <select id="weeklyDistanceGain" value={weeklyDistanceGain} onChange={(e) => setWeeklyDistanceGain(e.target.value)}>
+          {options}
+        </select>
+      </>
+    )
+  }
 
   return (
     <div className="container">
@@ -350,13 +393,8 @@ const PlanDetails = () => {
         <div className="column">
           <form>
             <fieldset>
-              <label for="projectForwardWeeks">Project Forward (Weeks)</label>
-              <select id="projectForwardWeeks" value={projectForwardWeeks} onChange={(e) => setProjectForward(e.target.value)}>
-                <option value={13}>3 months</option>
-                <option value={26}>6 months</option>
-                <option value={39}>9 months</option>
-                <option value={52}>12 months</option>
-              </select>
+              {renderProjectForwardWeeks()}
+              {renderWeeklyDistanceGain()}
             </fieldset>
           </form>
         </div>

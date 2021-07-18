@@ -63,8 +63,6 @@ const extractDetails = async (filePath: string) => {
 //
 // Planning
 //
-const WEEKLY_GAIN_MAX = 1.1
-
 interface CurrentWeek {
   start: typeof DateTime
   accruedRuns: number[]
@@ -158,7 +156,9 @@ const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProje
   return withThreeRuns
 }
 
-const computePlan = (weeklyGain: number, weeksProjected: number, now: typeof DateTime, runs: RunSummary[]): Plan => {
+const computePlan = (weeklyDistanceGain: number, weeksProjected: number, now: typeof DateTime, runs: RunSummary[]): Plan => {
+  const weeklyGain: number = weeklyDistanceGain + 1.0
+
   const byWeeks = Z.groupBy(firstDayOfWeek, runs)
   const distanceByWeek = Z.gbSum('totalDistance', byWeeks)
   const distanceByAllWeeks = addMissingWeeks(now, distanceByWeek)
@@ -245,6 +245,7 @@ const buildApplication = ({runsRootPath}) => {
   app.get('/api/plan', async (req, res) => {
     // Parse request parameters
     const weeksProjected: number = parseInt(req.query.projectForwardWeeks)
+    const weeklyDistanceGain: number = parseFloat(req.query.weeklyDistanceGain)
 
     // Prepare input data for plan
     const runFilenames = await readdir(runsRootPath)
@@ -254,7 +255,7 @@ const buildApplication = ({runsRootPath}) => {
     }))
 
     // Compute the plan
-    const plan = computePlan(WEEKLY_GAIN_MAX, weeksProjected, DateTime.now(), runs)
+    const plan = computePlan(weeklyDistanceGain, weeksProjected, DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(plan))
