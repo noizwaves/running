@@ -331,7 +331,7 @@ const PlanDetails = () => {
 
     return (
       <>
-        <label for="projectForwardWeeks">Project Forward (Weeks)</label>
+        <label htmlFor="projectForwardWeeks">Project Forward (Weeks)</label>
         <select id="projectForwardWeeks" value={projectForwardWeeks} onChange={(e) => setProjectForward(e.target.value)}>
           {options}
         </select>
@@ -351,7 +351,7 @@ const PlanDetails = () => {
 
     return (
       <>
-        <label for="weeklyDistanceGain">Weekly Distance Gain</label>
+        <label htmlFor="weeklyDistanceGain">Weekly Distance Gain</label>
         <select id="weeklyDistanceGain" value={weeklyDistanceGain} onChange={(e) => setWeeklyDistanceGain(e.target.value)}>
           {options}
         </select>
