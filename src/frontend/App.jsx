@@ -326,7 +326,7 @@ const PlanDetails = () => {
     ]
 
     const options = optionData.map(
-      ([value, text]) => <option value={value}>{text}</option>
+      ([value, text]) => <option key={value} value={value}>{text}</option>
     )
 
     return (
@@ -346,7 +346,7 @@ const PlanDetails = () => {
     ]
 
     const options = optionData.map(
-      ([value, text]) => <option value={value}>{text}</option>
+      ([value, text]) => <option key={value} value={value}>{text}</option>
     )
 
     return (
