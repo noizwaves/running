@@ -242,11 +242,11 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
   const data = [
     {
       id: 'actual',
-      data: actualData.map(({ date, distance }) => { return { x: DateTime.fromJSDate(date).toFormat('yyyy-MM-dd'), y: distance }}),
+      data: actualData.map(({ date, distance }) => { return { x: date.toFormat('yyyy-MM-dd'), y: distance }}),
     },
     {
       id: 'projected',
-      data: projectedData.map(({ date, distance }) => { return { x: DateTime.fromJSDate(date).toFormat('yyyy-MM-dd'), y: distance }})
+      data: projectedData.map(({ date, distance }) => { return { x: date.toFormat('yyyy-MM-dd'), y: distance }})
     },
   ]
 
@@ -308,13 +308,13 @@ const PlanDetails = () => {
   const nextWeek = futureWeeks[0]
 
   const actualData = []
-    .concat(pastWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.accruedDistance }}))
-    .concat([{ date: currentWeek.start.toJSDate(), distance: currentWeek.projectedDistance }])
+    .concat(pastWeeks.map(w => { return { date: w.start, distance: w.accruedDistance }}))
+    .concat([{ date: currentWeek.start, distance: currentWeek.projectedDistance }])
   actualData.sort((a, b) => a.date - b.date)
 
   const projectedData = []
-    .concat([{ date: currentWeek.start.toJSDate(), distance: currentWeek.projectedDistance }])
-    .concat(futureWeeks.map(w => { return { date: w.start.toJSDate(), distance: w.projectedDistance}}))
+    .concat([{ date: currentWeek.start, distance: currentWeek.projectedDistance }])
+    .concat(futureWeeks.map(w => { return { date: w.start, distance: w.projectedDistance}}))
   projectedData.sort((a, b) => a.date - b.date)
 
   const renderProjectForwardWeeks = () => {
