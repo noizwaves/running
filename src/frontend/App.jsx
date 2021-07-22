@@ -257,8 +257,11 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
 
   const xFormat = (startOfWeekDate) => {
     const format = 'LLL d'
-    const start = DateTime.fromJSDate(startOfWeekDate)
-    const end = start.plus({days: 1}).endOf('week')
+
+    // Timezone info is messed up from the chart, so set to UTC so time value is correct
+    const start = DateTime.fromJSDate(startOfWeekDate).toUTC()
+    const end = start.endOf('week')
+
     return `${start.toFormat(format)} - ${end.toFormat(format)}`
   }
 
