@@ -72,6 +72,7 @@ interface CurrentWeek {
   remainingDistance: number
 
   asThreeRuns: number[]
+  remainingRuns: number[]
 }
 
 interface PastWeek {
@@ -139,6 +140,36 @@ const computeThreeRunApproach = (weeklyGain: number) => (row: {projectedDistance
   ]
 }
 
+const computeRemainingRuns = (weeklyGain: number) => (row: {projectedDistance: number, remainingDistance: number, accruedRuns: number[]}) => {
+  const { accruedRuns, remainingDistance } = row
+  const numRemaining = 3 - accruedRuns.length
+  const perRunGain = Math.pow(weeklyGain, 1 / 3)
+
+  switch(numRemaining) {
+    case 0:
+      // no more runs remaining
+      return []
+
+    case 1:
+      // just run the entire remaining distance
+      return [remainingDistance]
+
+    case 2:
+      // remainingDistance = a + a * Gr
+      // remainingDistance = a * (1 + Gr)
+      // remainingDistance / (1 + Gr) = a
+      const baseDistance = remainingDistance / (1 + perRunGain)
+      return [baseDistance, baseDistance * perRunGain]
+
+    case 3:
+      // all three runs remain
+      return computeThreeRunApproach(weeklyGain)(row)
+
+    default:
+      throw new Error('Unexpected number of runs remaining')
+  }
+}
+
 const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProjected: number) => {
   // determine future week start dates
   // TODO: make less mutation-y
@@ -197,6 +228,8 @@ const computePlan = (weeklyDistanceGain: number, weeksProjected: number, now: ty
 
   // TODO: make this less mutation-y
   currentWeek.asThreeRuns = computeThreeRunApproach(weeklyGain)(currentWeek)
+  // TODO: compute remaining runs
+  currentWeek.remainingRuns = computeRemainingRuns(weeklyGain)(currentWeek)
 
   // Show latest week first
   return {

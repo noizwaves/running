@@ -379,6 +379,8 @@ const PlanDetails = () => {
             <dd><DistanceValue value={currentWeek.accruedDistance} /></dd>
             <dt>Remaining Distance</dt>
             <dd><DistanceValue value={currentWeek.remainingDistance} /></dd>
+            <dt>Remaining Runs</dt>
+            <dd><DistancesValues values={currentWeek.remainingRuns} /></dd>
           </dl>
         </div>
         <div className="column">
