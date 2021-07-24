@@ -132,11 +132,14 @@ const computeProjectedDistance = (weeklyGain: number) => (accruedDistances) => {
 }
 
 const computeThreeRunApproach = (weeklyGain: number) => (row: {projectedDistance: number}) => {
-  const threeRunRatio = 1 + ((weeklyGain - 1) / 3)
+  const perRunGain = Math.pow(weeklyGain, 1 / 3)
+  const { projectedDistance } = row
+  const baseDistance = projectedDistance / (1 + perRunGain + Math.pow(perRunGain, 2))
+
   return [
-    (row.projectedDistance / 3) / threeRunRatio,
-    row.projectedDistance / 3,
-    (row.projectedDistance / 3) * threeRunRatio,
+    baseDistance,
+    baseDistance * perRunGain,
+    baseDistance * Math.pow(perRunGain, 2)
   ]
 }
 
@@ -155,11 +158,11 @@ const computeRemainingRuns = (weeklyGain: number) => (row: {projectedDistance: n
       return [remainingDistance]
 
     case 2:
-      // remainingDistance = a + a * Gr
-      // remainingDistance = a * (1 + Gr)
-      // remainingDistance / (1 + Gr) = a
       const baseDistance = remainingDistance / (1 + perRunGain)
-      return [baseDistance, baseDistance * perRunGain]
+      return [
+        baseDistance,
+        baseDistance * perRunGain,
+      ]
 
     case 3:
       // all three runs remain
