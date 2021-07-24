@@ -314,5 +314,5 @@ const runsRootPath = path.resolve(process.env.RUNS_ROOT_PATH || 'fixtures/runs')
 const app = buildApplication({runsRootPath})
 
 app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`)
+  console.log(`Server is listening on port ${PORT}`)
 })
