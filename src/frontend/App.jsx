@@ -4,7 +4,6 @@ import {DateTime, Duration} from 'luxon'
 import {Link, NavLink, Route, Switch, useParams} from 'react-router-dom'
 import L from 'leaflet'
 import {MapContainer, TileLayer, Polyline} from 'react-leaflet'
-import {FlexibleWidthXYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
 import {ResponsiveLine} from '@nivo/line'
 
 //
@@ -23,7 +22,6 @@ L.Icon.Default.mergeOptions({
 // Styling
 //
 import 'leaflet/dist/leaflet.css'
-import 'react-vis/dist/style'
 import 'milligram/dist/milligram.css'
 
 //
@@ -193,6 +191,37 @@ const RunList = () => {
   )
 }
 
+const NivoRunDetailLineChart = ({ title, xData, yData }) => {
+  const data = zip(xData, yData).map(([x, y]) => { return { x, y }})
+  return (
+    <div>
+      <h4>{title}</h4>
+      <div style={{height: 200}}>
+        <ResponsiveLine
+          data={[ {id: 'something', data} ]}
+          curve='natural'
+
+          xScale={{ type: 'linear' }}
+          yScale={{ type: 'linear', min: 'auto' }}
+
+          enableLabel={true}
+          isInteractive={true}
+          useMesh={true}
+
+          margin={{ top: 5, right: 10, bottom: 35, left: 50 }}
+          colors={['#9b4dca']}
+          pointSize={0}
+
+          axisTop={null}
+          axisRight={null}
+          axisBottom={{legendPosition: 'middle', legendOffset: 32}}
+          axisLeft={{legendPosition: 'middle', legendOffset: -60}}
+        />
+      </div>
+    </div>
+  )
+}
+
 const RunDetails = () => {
   const { id } = useParams()
   const [details, setDetails] = React.useState(null)
@@ -234,29 +263,23 @@ const RunDetails = () => {
         <dt>Cadence</dt>
         <dd>{summary.avgCadence}</dd>
       </dl>
-      <MapContainer zoom={13} bounds={details.details.location} scrollWheelZoom={false} style={{height: '600'}}>
+      <MapContainer zoom={13} bounds={details.details.location} scrollWheelZoom={false} style={{height: '600', marginBottom: '20'}}>
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Polyline pathOptions={lineOptions} positions={details.details.location} />
       </MapContainer>
-      <div style={{height: 200}}>
-        <FlexibleWidthXYPlot height={200} getX={d => d[0]} getY={d => d[1]}>
-          <HorizontalGridLines />
-          <LineSeries data={zip(details.details.distance, details.details.speed)} />
-          <XAxis />
-          <YAxis />
-        </FlexibleWidthXYPlot>
-      </div>
-      <div style={{height: 200}}>
-        <FlexibleWidthXYPlot height={200} getX={d => d[0]} getY={d => d[1]}>
-          <HorizontalGridLines />
-          <LineSeries data={zip(details.details.distance, details.details.hrt)} />
-          <XAxis />
-          <YAxis />
-        </FlexibleWidthXYPlot>
-      </div>
+      <NivoRunDetailLineChart
+        title='Speed'
+        xData={details.details.distance}
+        yData={details.details.speed}
+      />
+      <NivoRunDetailLineChart
+        title='Heart Rate'
+        xData={details.details.distance}
+        yData={details.details.hrt}
+      />
     </div>
   )
 }
