@@ -385,17 +385,39 @@ const PlanDetails = () => {
     )
   }
 
+  const renderNextRun = () => {
+    if (currentWeek.remainingRuns.length > 0) {
+      const nextRun = currentWeek.remainingRuns[currentWeek.remainingRuns.length - 1]
+      return (
+        <span><DistanceValue value={nextRun} /> this week</span>
+      )
+    } else {
+      const nextRun = nextWeek.asThreeRuns[0]
+      return (
+        <span><DistanceValue value={nextRun} /> next week</span>
+      )
+    }
+  }
+
   return (
     <div className="container">
       <h3>Plan</h3>
+      <div className="row">
+        <div className="column">
+          <h4>Next run</h4>
+          <p>
+            {renderNextRun()}
+          </p>
+        </div>
+      </div>
       <div className="row">
         <div className="column">
           <h4>Current Week (<WeeklyRange date={currentWeek.start} />)</h4>
           <dl>
             <dt>Distance</dt>
             <dd>
-              <DistanceValue value={currentWeek.accruedDistance} /> of&nbsp;
-              <DistanceValue value={currentWeek.projectedDistance} />&nbsp;
+              <DistanceValue value={currentWeek.accruedDistance} /> of{' '}
+              <DistanceValue value={currentWeek.projectedDistance} />{' '}
               (<DistanceValue value={currentWeek.remainingDistance} /> remaining)
             </dd>
             <dt>Runs</dt>
