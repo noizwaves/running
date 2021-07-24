@@ -228,7 +228,6 @@ const computePlan = (weeklyDistanceGain: number, weeksProjected: number, now: ty
 
   // TODO: make this less mutation-y
   currentWeek.asThreeRuns = computeThreeRunApproach(weeklyGain)(currentWeek)
-  // TODO: compute remaining runs
   currentWeek.remainingRuns = computeRemainingRuns(weeklyGain)(currentWeek)
 
   // Show latest week first
