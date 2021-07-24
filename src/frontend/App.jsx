@@ -88,6 +88,29 @@ const DistancesValues = ({values}) => {
   }
 }
 
+const PartiallyCompletedRuns = ({completed, remaining}) => {
+  const runs = []
+    .concat(completed.map(distance => { return { distance: distance, icon: '✅'}}))
+    .concat(remaining.map(distance => { return { distance: distance, icon: '⏱️'}}))
+
+    if (runs.length === 0) {
+      return (
+        'none'
+      )
+    } else {
+      return runs.map(({distance, icon}, index) => {
+        return (
+          <span key={index}>
+            {icon}&nbsp;
+            <DistanceValue value={distance} />
+            {(index != runs.length - 1) ? ', ' : ''}
+            &nbsp;
+          </span>
+        )
+      })
+    }
+}
+
 const DurationValue = ({value}) => {
   const duration = Duration.fromObject({seconds: value})
   return (duration.toFormat('m:ss'))
@@ -369,18 +392,16 @@ const PlanDetails = () => {
         <div className="column">
           <h4>Current Week (<WeeklyRange date={currentWeek.start} />)</h4>
           <dl>
-            <dt>Projected Distance</dt>
-            <dd><DistanceValue value={currentWeek.projectedDistance} /></dd>
-            <dt>As Three Runs</dt>
-            <dd><DistancesValues values={currentWeek.asThreeRuns} /></dd>
-            <dt>Accrued Runs</dt>
-            <dd><DistancesValues values={currentWeek.accruedRuns} /></dd>
-            <dt>Accrued Distance</dt>
-            <dd><DistanceValue value={currentWeek.accruedDistance} /></dd>
-            <dt>Remaining Distance</dt>
-            <dd><DistanceValue value={currentWeek.remainingDistance} /></dd>
-            <dt>Remaining Runs</dt>
-            <dd><DistancesValues values={currentWeek.remainingRuns} /></dd>
+            <dt>Distance</dt>
+            <dd>
+              <DistanceValue value={currentWeek.accruedDistance} /> of&nbsp;
+              <DistanceValue value={currentWeek.projectedDistance} />&nbsp;
+              (<DistanceValue value={currentWeek.remainingDistance} /> remaining)
+            </dd>
+            <dt>Runs</dt>
+            <dd>
+              <PartiallyCompletedRuns completed={currentWeek.accruedRuns} remaining={currentWeek.remainingRuns} />
+              </dd>
           </dl>
         </div>
         <div className="column">
