@@ -1,9 +1,9 @@
-const { readdir, readFile } = require('fs').promises
-const path = require('path')
-const fitDecoder = require('fit-decoder')
-const { DateTime } = require('luxon')
+import { readdir, readFile } from 'fs/promises'
+import path from 'path'
+import fitDecoder from 'fit-decoder'
+import { DateTime } from 'luxon'
 
-const { RunId, RunCollection, RunDetails, RunSummary } = require('./model')
+import { RunId, RunCollection, RunDetails, RunSummary } from './model'
 
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
@@ -19,7 +19,7 @@ const readBufferWithCache = async (cache: any, filePath: string): Promise<any> =
   }
 }
 
-const extractSummary = async (cache: any, filePath: string): Promise<typeof RunSummary> => {
+const extractSummary = async (cache: any, filePath: string): Promise<RunSummary> => {
   const buffer = await readBufferWithCache(cache, filePath)
 
   const jsonRaw = fitDecoder.fit2json(buffer)
@@ -35,7 +35,7 @@ const extractSummary = async (cache: any, filePath: string): Promise<typeof RunS
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
 }
 
-const extractDetails = async (cache: any, filePath: string): Promise<typeof RunDetails> => {
+const extractDetails = async (cache: any, filePath: string): Promise<RunDetails> => {
   const buffer = await readBufferWithCache(cache, filePath)
 
   const jsonRaw = fitDecoder.fit2json(buffer)
@@ -54,10 +54,10 @@ const extractDetails = async (cache: any, filePath: string): Promise<typeof RunD
   return {timestamp, location, distance, speed, hrt, cadence}
 }
 
-export const makeRunCollection = (runsRoot: string): typeof RunCollection => {
+export const makeRunCollection = (runsRoot: string): RunCollection => {
   const _cache = {}
 
-  const getSummaries = async (): Promise<typeof RunSummary[]> => {
+  const getSummaries = async (): Promise<RunSummary[]> => {
     const runFilenames = await readdir(runsRoot)
 
     const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
@@ -72,7 +72,7 @@ export const makeRunCollection = (runsRoot: string): typeof RunCollection => {
     return runs
   }
 
-  const getDetails = async (id: typeof RunId): Promise<{details: typeof RunDetails, summary: typeof RunSummary}> => {
+  const getDetails = async (id: RunId): Promise<{details: RunDetails, summary: RunSummary}> => {
     const filePath = path.join(runsRoot, id)
 
     const summary = await extractSummary(_cache, filePath)

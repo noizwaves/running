@@ -1,9 +1,10 @@
-const { DateTime } = require('luxon')
-const { RunSummary } = require('./model')
-const Z = require('zebras')
+import { DateTime } from 'luxon'
+import Z from 'zebras'
+
+import { RunSummary } from './model'
 
 export interface CurrentWeek {
-  start: typeof DateTime
+  start: DateTime
   accruedRuns: number[]
   accruedDistance: number
 
@@ -15,7 +16,7 @@ export interface CurrentWeek {
 }
 
 export interface PastWeek {
-  start: typeof DateTime
+  start: DateTime
   accruedRuns: number[]
 
   accruedDistance: number
@@ -24,7 +25,7 @@ export interface PastWeek {
 }
 
 export interface FutureWeek {
-  start: typeof DateTime
+  start: DateTime
 
   projectedDistance: number
 
@@ -37,19 +38,19 @@ export interface Plan {
   futureWeeks: FutureWeek[]
 }
 
-const firstDayOfWeek = (run: typeof RunSummary): string => {
+const firstDayOfWeek = (run: RunSummary): string => {
   return run.startTime.startOf('week').toISO()
 }
 
-const addMissingWeeks = (planOutTo: typeof DateTime, incomplete) => {
-  const dates = Z.getCol('group', incomplete)
+const addMissingWeeks = (planOutTo: DateTime, incomplete) => {
+  const dates = Z.getCol('group', incomplete) as any as string[]
   const start = DateTime.fromISO(dates[0])
   const incompleteFinish = DateTime.fromISO(dates[dates.length - 1])
   const planOutToFinish = planOutTo.startOf('week')
   const finish = (planOutToFinish > incompleteFinish) ? planOutToFinish : incompleteFinish
 
   const missing = []
-  let cursor = start
+  let cursor: DateTime = start
   while (cursor <= finish) {
     if (!dates.includes(cursor.toISO())) {
       missing.push({group: cursor.toISO(), sum: 0})
@@ -129,7 +130,7 @@ const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProje
   return withThreeRuns
 }
 
-export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, now: typeof DateTime, runs: typeof RunSummary[]): Plan => {
+export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, now: DateTime, runs: RunSummary[]): Plan => {
   const weeklyGain: number = weeklyDistanceGain + 1.0
 
   const byWeeks = Z.groupBy(firstDayOfWeek, runs)
@@ -140,11 +141,11 @@ export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, 
   const actualRuns = {}
   Object.entries(byWeeks).forEach(keyValue => {
     const start: string = keyValue[0]
-    const rs: typeof RunSummary[] = keyValue[1] as typeof RunSummary[]
+    const rs: RunSummary[] = keyValue[1] as RunSummary[]
     actualRuns[start] = rs.map(r => r.totalDistance)
   })
 
-  const weeks = distanceByAllWeeks.map(row => {
+  const weeks = distanceByAllWeeks.map((row: any) => {
     return {
       start: DateTime.fromISO(row.group),
       accruedDistance: row.sum,
@@ -155,17 +156,17 @@ export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, 
 
   // Calculate projected from previous weeks accrued
   const accruedDistance = Z.getCol('accruedDistance', sortedWeeks)
-  const shiftedProjected = Z.cumulative(computeProjectedDistance(weeklyGain), accruedDistance)
+  const shiftedProjected = Z.cumulative(computeProjectedDistance(weeklyGain), accruedDistance) as number[]
   const withProjected = Z.addCol('projectedDistance', shiftedProjected, sortedWeeks)
 
   // Calculate remaining distance
-  const remainingDistance = Z.deriveCol((row) => row.projectedDistance - row.accruedDistance, withProjected)
+  const remainingDistance = Z.deriveCol((row: any) => row.projectedDistance - row.accruedDistance, withProjected)
   const withRemaining = Z.addCol('remainingDistance', remainingDistance, withProjected)
 
   // All current runs captured here
   const allWeeks = Z.sortByCol('start', 'desc', withRemaining)
 
-  const currentWeek = Z.head(1, allWeeks)[0]
+  const currentWeek: any = Z.head(1, allWeeks)[0]
   const pastWeeks = Z.tail(allWeeks.length - 1, allWeeks)
 
   // TODO: make this less mutation-y
@@ -174,8 +175,8 @@ export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, 
 
   // Show latest week first
   return {
-    currentWeek: currentWeek,
-    pastWeeks: pastWeeks,
-    futureWeeks: projectFutureWeeks(currentWeek, weeklyGain, weeksProjected),
+    currentWeek: currentWeek as CurrentWeek,
+    pastWeeks: pastWeeks as PastWeek[],
+    futureWeeks: projectFutureWeeks(currentWeek, weeklyGain, weeksProjected) as FutureWeek[],
    }
 }

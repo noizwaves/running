@@ -1,16 +1,16 @@
-const express = require('express')
-const path = require('path')
-const { DateTime } = require('luxon')
+import express from 'express'
+import path from 'path'
+import { DateTime}  from 'luxon'
 
-const { RunCollection, RunDetails } = require('./model')
-const { extractDetails, extractSummary, makeRunCollection } = require('./persistence')
-const { Plan, computePlan } = require('./plan')
+import { RunCollection } from './model'
+import { makeRunCollection } from './persistence'
+import { Plan, computePlan } from './plan'
 
 //
 // Application
 //
 const buildApplication = ({runsRootPath}) => {
-  const runCollection: typeof RunCollection = makeRunCollection(runsRootPath)
+  const runCollection: RunCollection = makeRunCollection(runsRootPath)
 
   const app = express()
 
@@ -26,7 +26,7 @@ const buildApplication = ({runsRootPath}) => {
   app.get('/api/runs', async (req, res) => {
     const runs = await runCollection.getSummaries()
 
-    runs.sort((a, b) => a.startTime - b.startTime).reverse()
+    runs.sort((a, b) => a.startTime.toMillis() - b.startTime.toMillis()).reverse()
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify({runs: runs}))
@@ -34,13 +34,13 @@ const buildApplication = ({runsRootPath}) => {
 
   app.get('/api/plan', async (req, res) => {
     // Parse request parameters
-    const weeksProjected: number = parseInt(req.query.projectForwardWeeks)
-    const weeklyDistanceGain: number = parseFloat(req.query.weeklyDistanceGain)
+    const weeksProjected: number = parseInt(req.query.projectForwardWeeks[0])
+    const weeklyDistanceGain: number = parseFloat(req.query.weeklyDistanceGain[0])
 
     const runs = await runCollection.getSummaries()
 
     // Compute the plan
-    const plan: typeof Plan = computePlan(weeklyDistanceGain, weeksProjected, DateTime.now(), runs)
+    const plan: Plan = computePlan(weeklyDistanceGain, weeksProjected, DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(plan))

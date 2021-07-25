@@ -1,7 +1,9 @@
+import { DateTime}  from 'luxon'
+
 export type RunId = string
 
 export interface RunSummary {
-  startTime: typeof DateTime
+  startTime: DateTime
   totalDistance: number
   totalTime: number
   avgHeartRate: number
