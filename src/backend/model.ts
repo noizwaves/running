@@ -1,6 +1,6 @@
-type RunId = string
+export type RunId = string
 
-interface RunSummary {
+export interface RunSummary {
   startTime: typeof DateTime
   totalDistance: number
   totalTime: number
@@ -9,7 +9,7 @@ interface RunSummary {
   avgCadence: number
 }
 
-interface RunDetails {
+export interface RunDetails {
   timestamp: any;
   location: any;
   distance: any;
@@ -18,7 +18,7 @@ interface RunDetails {
   cadence: any;
 }
 
-interface RunCollection {
+export interface RunCollection {
   getSummaries: () => Promise<RunSummary[]>;
   getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>;
 }

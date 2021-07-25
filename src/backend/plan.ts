@@ -129,7 +129,7 @@ const projectFutureWeeks = (current: CurrentWeek, weeklyGain: number, weeksProje
   return withThreeRuns
 }
 
-export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, now: typeof DateTime, runs: RunSummary[]): Plan => {
+export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, now: typeof DateTime, runs: typeof RunSummary[]): Plan => {
   const weeklyGain: number = weeklyDistanceGain + 1.0
 
   const byWeeks = Z.groupBy(firstDayOfWeek, runs)
@@ -140,7 +140,7 @@ export const computePlan = (weeklyDistanceGain: number, weeksProjected: number, 
   const actualRuns = {}
   Object.entries(byWeeks).forEach(keyValue => {
     const start: string = keyValue[0]
-    const rs: RunSummary[] = keyValue[1] as RunSummary[]
+    const rs: typeof RunSummary[] = keyValue[1] as typeof RunSummary[]
     actualRuns[start] = rs.map(r => r.totalDistance)
   })
 

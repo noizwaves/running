@@ -3,12 +3,12 @@ const path = require('path')
 const fitDecoder = require('fit-decoder')
 const { DateTime } = require('luxon')
 
-const { RunCollection, RunDetails, RunSummary } = require('./model')
+const { RunId, RunCollection, RunDetails, RunSummary } = require('./model')
 
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
-const extractSummary = async (filePath: string): Promise<RunSummary> => {
+const extractSummary = async (filePath: string): Promise<typeof RunSummary> => {
   const file = await readFile(filePath)
 
   const jsonRaw = fitDecoder.fit2json(file.buffer)
@@ -24,7 +24,7 @@ const extractSummary = async (filePath: string): Promise<RunSummary> => {
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
 }
 
-const extractDetails = async (filePath: string): Promise<RunDetails> => {
+const extractDetails = async (filePath: string): Promise<typeof RunDetails> => {
   const file = await readFile(filePath)
   const buffer = file.buffer
 
@@ -44,8 +44,8 @@ const extractDetails = async (filePath: string): Promise<RunDetails> => {
   return {timestamp, location, distance, speed, hrt, cadence}
 }
 
-export const makeRunCollection = (runsRoot: string): RunCollection => {
-  const getSummaries = async (): Promise<RunSummary[]> => {
+export const makeRunCollection = (runsRoot: string): typeof RunCollection => {
+  const getSummaries = async (): Promise<typeof RunSummary[]> => {
     const runFilenames = await readdir(runsRoot)
 
     const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
@@ -60,7 +60,7 @@ export const makeRunCollection = (runsRoot: string): RunCollection => {
     return runs
   }
 
-  const getDetails = async (id: RunId): Promise<{details: RunDetails, summary: RunSummary}> => {
+  const getDetails = async (id: typeof RunId): Promise<{details: typeof RunDetails, summary: typeof RunSummary}> => {
     const filePath = path.join(runsRoot, id)
 
     const summary = await extractSummary(filePath)
