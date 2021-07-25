@@ -12,15 +12,15 @@ export interface RunSummary {
 }
 
 export interface RunDetails {
-  timestamp: any;
-  location: any;
-  distance: any;
-  speed: any;
-  hrt: any;
-  cadence: any;
+  timestamp: any
+  location: any
+  distance: any
+  speed: any
+  hrt: any
+  cadence: any
 }
 
 export interface RunCollection {
-  getSummaries: () => Promise<RunSummary[]>;
-  getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>;
+  getSummaries: () => Promise<RunSummary[]>
+  getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>
 }

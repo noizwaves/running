@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import Z from 'zebras'
+import * as Z from 'zebras'
 
 import { RunSummary } from './model'
 

@@ -19,6 +19,8 @@ jobs:
         run: npm run build:frontend
       - name: Build backend
         run: npm run build:backend
+      - name: Test backend
+        run: npm run test:backend
   build-image:
     runs-on: ubuntu-latest
     needs: [build-app]
