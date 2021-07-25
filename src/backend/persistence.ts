@@ -8,10 +8,21 @@ const { RunId, RunCollection, RunDetails, RunSummary } = require('./model')
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
-const extractSummary = async (filePath: string): Promise<typeof RunSummary> => {
-  const file = await readFile(filePath)
+const readBufferWithCache = async (cache: any, filePath: string): Promise<any> => {
+  if (filePath in cache) {
+    return Promise.resolve(cache[filePath])
+  } else {
+    const file = await readFile(filePath)
+    const buffer = file.buffer
+    cache[filePath] = buffer
+    return Promise.resolve(buffer)
+  }
+}
 
-  const jsonRaw = fitDecoder.fit2json(file.buffer)
+const extractSummary = async (cache: any, filePath: string): Promise<typeof RunSummary> => {
+  const buffer = await readBufferWithCache(cache, filePath)
+
+  const jsonRaw = fitDecoder.fit2json(buffer)
   const json = fitDecoder.parseRecords(jsonRaw)
 
   const startTime = DateTime.fromJSDate(fitDecoder.getRecordFieldValue(json, 'session', 'start_time')[0])
@@ -24,9 +35,8 @@ const extractSummary = async (filePath: string): Promise<typeof RunSummary> => {
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
 }
 
-const extractDetails = async (filePath: string): Promise<typeof RunDetails> => {
-  const file = await readFile(filePath)
-  const buffer = file.buffer
+const extractDetails = async (cache: any, filePath: string): Promise<typeof RunDetails> => {
+  const buffer = await readBufferWithCache(cache, filePath)
 
   const jsonRaw = fitDecoder.fit2json(buffer)
   const json = fitDecoder.parseRecords(jsonRaw)
@@ -45,12 +55,14 @@ const extractDetails = async (filePath: string): Promise<typeof RunDetails> => {
 }
 
 export const makeRunCollection = (runsRoot: string): typeof RunCollection => {
+  const _cache = {}
+
   const getSummaries = async (): Promise<typeof RunSummary[]> => {
     const runFilenames = await readdir(runsRoot)
 
     const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
       const filePath = path.join(runsRoot, filename)
-      const summary = await extractSummary(filePath)
+      const summary = await extractSummary(_cache, filePath)
       return {
         ...summary,
         id: filename,
@@ -63,8 +75,8 @@ export const makeRunCollection = (runsRoot: string): typeof RunCollection => {
   const getDetails = async (id: typeof RunId): Promise<{details: typeof RunDetails, summary: typeof RunSummary}> => {
     const filePath = path.join(runsRoot, id)
 
-    const summary = await extractSummary(filePath)
-    const details = await extractDetails(filePath)
+    const summary = await extractSummary(_cache, filePath)
+    const details = await extractDetails(_cache, filePath)
 
     return { details, summary }
   }
