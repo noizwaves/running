@@ -142,7 +142,7 @@ const RunList = () => {
 
   if (!runs) {
     return (
-      <div className="container">Loading...</div>
+      <></>
     )
   }
 
@@ -235,7 +235,7 @@ const RunDetails = () => {
 
   if (!details) {
     return (
-      <div className="container">Loading...</div>
+      <></>
     )
   }
 
@@ -349,7 +349,7 @@ const PlanDetails = () => {
 
   if (!plan) {
     return (
-      <div className="container">Loading...</div>
+      <></>
     )
   }
 
