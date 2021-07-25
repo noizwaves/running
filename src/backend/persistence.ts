@@ -1,13 +1,14 @@
-const { readFile } = require('fs').promises
+const { readdir, readFile } = require('fs').promises
+const path = require('path')
 const fitDecoder = require('fit-decoder')
 const { DateTime } = require('luxon')
 
-const { RunDetails, RunSummary } = require('./model')
+const { RunCollection, RunDetails, RunSummary } = require('./model')
 
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
-export const extractSummary = async (filePath: string): Promise<typeof RunSummary> => {
+const extractSummary = async (filePath: string): Promise<RunSummary> => {
   const file = await readFile(filePath)
 
   const jsonRaw = fitDecoder.fit2json(file.buffer)
@@ -23,7 +24,7 @@ export const extractSummary = async (filePath: string): Promise<typeof RunSummar
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
 }
 
-export const extractDetails = async (filePath: string): Promise<typeof RunDetails> => {
+const extractDetails = async (filePath: string): Promise<RunDetails> => {
   const file = await readFile(filePath)
   const buffer = file.buffer
 
@@ -41,4 +42,35 @@ export const extractDetails = async (filePath: string): Promise<typeof RunDetail
   const cadence = fitDecoder.getRecordFieldValue(json, 'record', 'cadence')
 
   return {timestamp, location, distance, speed, hrt, cadence}
+}
+
+export const makeRunCollection = (runsRoot: string): RunCollection => {
+  const getSummaries = async (): Promise<RunSummary[]> => {
+    const runFilenames = await readdir(runsRoot)
+
+    const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
+      const filePath = path.join(runsRoot, filename)
+      const summary = await extractSummary(filePath)
+      return {
+        ...summary,
+        id: filename,
+      }
+    }))
+
+    return runs
+  }
+
+  const getDetails = async (id: RunId): Promise<{details: RunDetails, summary: RunSummary}> => {
+    const filePath = path.join(runsRoot, id)
+
+    const summary = await extractSummary(filePath)
+    const details = await extractDetails(filePath)
+
+    return { details, summary }
+  }
+
+  return {
+    getSummaries,
+    getDetails
+  }
 }

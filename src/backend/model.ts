@@ -1,3 +1,5 @@
+type RunId = string
+
 interface RunSummary {
   startTime: typeof DateTime
   totalDistance: number
@@ -14,4 +16,9 @@ interface RunDetails {
   speed: any;
   hrt: any;
   cadence: any;
+}
+
+interface RunCollection {
+  getSummaries: () => Promise<RunSummary[]>;
+  getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>;
 }
