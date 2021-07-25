@@ -34,8 +34,8 @@ const buildApplication = ({runsRootPath}) => {
 
   app.get('/api/plan', async (req, res) => {
     // Parse request parameters
-    const weeksProjected: number = parseInt(req.query.projectForwardWeeks[0])
-    const weeklyDistanceGain: number = parseFloat(req.query.weeklyDistanceGain[0])
+    const weeksProjected: number = parseInt(req.query.projectForwardWeeks as string)
+    const weeklyDistanceGain: number = parseFloat(req.query.weeklyDistanceGain as string)
 
     const runs = await runCollection.getSummaries()
 
