@@ -2,9 +2,10 @@ import express from 'express'
 import path from 'path'
 import { DateTime}  from 'luxon'
 
-import { RunCollection } from './model'
+import { RunCollection, Analysis } from './model'
 import { makeRunCollection } from './persistence'
 import { Plan, computePlan } from './plan'
+import { computeAnalysis } from './analyse'
 
 //
 // Application
@@ -44,6 +45,14 @@ const buildApplication = ({runsRootPath}) => {
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(plan))
+  })
+
+  app.get('/api/analyse', async (req, res) => {
+    const runs = await runCollection.getSummaries()
+    const analysis: Analysis = computeAnalysis(runs)
+
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify(analysis))
   })
 
   app.use('/', express.static(path.join(__dirname, '../../dist/frontend/')))

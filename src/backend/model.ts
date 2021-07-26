@@ -24,3 +24,15 @@ export interface RunCollection {
   getSummaries: () => Promise<RunSummary[]>
   getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>
 }
+
+export interface ByWeekAnalysis {
+  start: DateTime
+  totalDistance: number
+
+  // The percentage increase in total distance on previous week
+  distanceGain: number
+}
+
+export interface Analysis {
+  byWeek: ByWeekAnalysis[]
+}

@@ -11,7 +11,8 @@
         "start": "node dist/backend/index.js",
         "dev:backend": "nodemon -e ts --exec \"ts-node src/backend/index.ts\"",
         "dev:frontend": "parcel watch -d dist/frontend src/frontend/index.html",
-        "test:backend": "jest --rootDir test/backend"
+        "test:backend": "jest --rootDir test/backend",
+        "tdd:backend": "jest --rootDir test/backend --watchAll --all"
     },
     "author": "Adam Neumann",
     "license": "ISC",

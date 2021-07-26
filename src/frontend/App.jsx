@@ -61,6 +61,12 @@ const parsePlan = ({currentWeek, pastWeeks, futureWeeks}) => {
   }
 }
 
+const parseAnalysis = ({byWeek}) => {
+  return {
+    byWeek: byWeek.map(bw => { return { ...bw, start: DateTime.fromISO(bw.start)} }),
+  }
+}
+
 //
 // Measurements
 //
@@ -112,6 +118,15 @@ const PartiallyCompletedRuns = ({completed, remaining}) => {
 const DurationValue = ({value}) => {
   const duration = Duration.fromObject({seconds: value})
   return (duration.toFormat('m:ss'))
+}
+
+const GainValue = ({value}) => {
+  if (value === null) {
+    return '-'
+  }
+
+  const numeral = (value * 100).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})
+  return `${numeral} %`
 }
 
 const PaceValue = ({speedValue}) => {
@@ -474,6 +489,68 @@ const PlanDetails = () => {
   )
 }
 
+const Analyse = () => {
+  const [analysis, setAnalysis] = React.useState(null)
+
+  React.useEffect(() => {
+    axios.get(`/api/analyse`)
+      .then(response => {
+        setAnalysis(parseAnalysis(response.data))
+      })
+  }, [])
+
+  if (!analysis) {
+    return (
+      <></>
+    )
+  }
+
+  const { byWeek } = analysis
+
+  const renderByWeekRows = () => {
+    return byWeek.map((week, index) => {
+      return (
+        <tr key={index}>
+          <td>
+            <WeeklyRange date={week.start} />
+          </td>
+          <td>
+            <DistanceValue value={week.totalDistance} />
+          </td>
+          <td>
+            <GainValue value={week.distanceGain} />
+          </td>
+        </tr>
+      )
+    })
+  }
+
+  const renderByWeek = () => {
+    return (
+      <table>
+        <thead>
+          <tr>
+            <th>Week</th>
+            <th>Total Distance</th>
+            <th>Distance Gain</th>
+          </tr>
+        </thead>
+        <tbody>
+          {renderByWeekRows()}
+        </tbody>
+      </table>
+    )
+  }
+
+  return (
+    <div className='container'>
+      <h3>Analyse</h3>
+      <h4>By Week</h4>
+      {renderByWeek()}
+    </div>
+  )
+}
+
 //
 // App
 //
@@ -483,6 +560,7 @@ const NavigationBar = () => {
       <nav className='container'>
         <NavLink to='/' className="button button-clear">Runs</NavLink>
         <NavLink to='/plan' className="button button-clear">Plan</NavLink>
+        <NavLink to='/analyse' className="button button-clear">Analyse</NavLink>
       </nav>
     </header>
   )
@@ -495,6 +573,9 @@ const App = () => {
       <Switch>
         <Route path="/plan">
           <PlanDetails />
+        </Route>
+        <Route path="/analyse">
+          <Analyse />
         </Route>
         <Route path="/runs/:id">
           <RunDetails></RunDetails>
