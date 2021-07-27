@@ -51,7 +51,7 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
             enableLabel={true}
             isInteractive={true}
             useMesh={true}
-            margin={{ top: 10, right: 60, bottom: 35, left: 65 }}
+            margin={{ top: 10, right: 10, bottom: 35, left: 65 }}
             xScale={{type: 'time', format: '%Y-%m-%d'}}
             xFormat={xFormat}
             yFormat={yFormat}

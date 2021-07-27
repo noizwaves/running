@@ -4,6 +4,8 @@ export type RunId = string
 
 export interface RunSummary {
   startTime: DateTime
+
+  /** Distance of the run (in meters) */
   totalDistance: number
   totalTime: number
   avgHeartRate: number
@@ -33,6 +35,12 @@ export interface ByWeekAnalysis {
   distanceGain: number
 }
 
+export interface ByDayAnalysis {
+  date: DateTime
+  totalDistance: number
+}
+
 export interface Analysis {
   byWeek: ByWeekAnalysis[]
+  byDay: ByDayAnalysis[]
 }

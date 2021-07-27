@@ -71,4 +71,55 @@ describe('analysing', () => {
       },
     ])
   })
+
+  it('performs day by day analysis', () => {
+    const runs: RunSummary[] = [
+      simpleRun(7, 14, 0.5, 180),
+      simpleRun(7, 15, 1.0, 360),
+      simpleRun(7, 16, 1.5, 540),
+    ]
+
+    const analysis: Analysis = computeAnalysis(runs)
+
+    expect(analysis).not.toBeNull()
+    expect(analysis.byDay).toEqual([
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 16}),
+        totalDistance: 1.5,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 15}),
+        totalDistance: 1.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 14}),
+        totalDistance: 0.5,
+      },
+    ])
+  })
+
+  it('handles no-run days', () => {
+    const runs: RunSummary[] = [
+      simpleRun(7, 15, 1.0, 360),
+      simpleRun(7, 17, 1.5, 540),
+    ]
+
+    const analysis: Analysis = computeAnalysis(runs)
+
+    expect(analysis).not.toBeNull()
+    expect(analysis.byDay).toEqual([
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 17}),
+        totalDistance: 1.5,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 16}),
+        totalDistance: null,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 15}),
+        totalDistance: 1.0,
+      },
+    ])
+  })
 })
