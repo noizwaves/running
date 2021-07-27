@@ -141,7 +141,7 @@ export const PlanDetailsPage = () => {
 
   const renderNextRun = () => {
     if (currentWeek.remainingRuns.length > 0) {
-      const nextRun = currentWeek.remainingRuns[currentWeek.remainingRuns.length - 1]
+      const nextRun = currentWeek.remainingRuns[0]
       return (
         <span><DistanceValue value={nextRun} /> this week</span>
       )
