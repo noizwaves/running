@@ -38,6 +38,7 @@ export interface ByWeekAnalysis {
 export interface ByDayAnalysis {
   date: DateTime
   totalDistance: number
+  sevenDayTotalDistance: number
 }
 
 export interface Analysis {

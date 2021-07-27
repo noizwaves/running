@@ -80,7 +80,13 @@ const computeByDay = (runs: RunSummary[]): ByDayAnalysis[] => {
     }
   })
 
-  return Z.sort((a, b) => b.date.toMillis() - a.date.toMillis(), unsorted) as ByDayAnalysis[]
+  const sevenDay = Z.cumulative((arr: any[]) => {
+    const tail = Z.getCol('value', Z.tail(7, arr.map(value => { return { value } })))
+    return Z.sum(tail)
+  }, Z.getCol('totalDistance', unsorted)) as any[]
+  const withSevenDay = Z.addCol('sevenDayTotalDistance', sevenDay, unsorted)
+
+  return Z.sort((a, b) => b.date.toMillis() - a.date.toMillis(), withSevenDay) as ByDayAnalysis[]
 }
 
 export const computeAnalysis = (runs: RunSummary[]): Analysis => {

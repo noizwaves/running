@@ -20,6 +20,11 @@ const NivoLineByDayChart = ({ byDay }) => {
         .filter(({ totalDistance }) => totalDistance !== null)
         .map(({ date, totalDistance }) => { return { x: date.toFormat('yyyy-MM-dd'), y: totalDistance }}),
     },
+    {
+      id: 'sevenDayTotalDistance',
+      data: byDay
+        .map(({ date, sevenDayTotalDistance}) => { return { x: date.toFormat('yyyy-MM-dd'), y: sevenDayTotalDistance}})
+    }
   ]
 
   const yFormat = (value) => {

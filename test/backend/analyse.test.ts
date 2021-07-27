@@ -86,14 +86,17 @@ describe('analysing', () => {
       {
         date: DateTime.fromObject({year: 2021, month: 7, day: 16}),
         totalDistance: 1.5,
+        sevenDayTotalDistance: 3.0,
       },
       {
         date: DateTime.fromObject({year: 2021, month: 7, day: 15}),
         totalDistance: 1.0,
+        sevenDayTotalDistance: 1.5,
       },
       {
         date: DateTime.fromObject({year: 2021, month: 7, day: 14}),
         totalDistance: 0.5,
+        sevenDayTotalDistance: 0.5,
       },
     ])
   })
@@ -111,14 +114,70 @@ describe('analysing', () => {
       {
         date: DateTime.fromObject({year: 2021, month: 7, day: 17}),
         totalDistance: 1.5,
+        sevenDayTotalDistance: 2.5,
       },
       {
         date: DateTime.fromObject({year: 2021, month: 7, day: 16}),
         totalDistance: null,
+        sevenDayTotalDistance: 1.0,
       },
       {
         date: DateTime.fromObject({year: 2021, month: 7, day: 15}),
         totalDistance: 1.0,
+        sevenDayTotalDistance: 1.0,
+      },
+    ])
+  })
+
+  it('excludes very past runs from sevenDayTotalDistance', () => {
+    const runs: RunSummary[] = [
+      simpleRun(7, 10, 1.0, 360),
+      simpleRun(7, 17, 4.0, 1080),
+    ]
+
+    const analysis: Analysis = computeAnalysis(runs)
+
+    expect(analysis).not.toBeNull()
+    expect(analysis.byDay).toEqual([
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 17}),
+        totalDistance: 4.0,
+        sevenDayTotalDistance: 4.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 16}),
+        totalDistance: null,
+        sevenDayTotalDistance: 1.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 15}),
+        totalDistance: null,
+        sevenDayTotalDistance: 1.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 14}),
+        totalDistance: null,
+        sevenDayTotalDistance: 1.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 13}),
+        totalDistance: null,
+        sevenDayTotalDistance: 1.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 12}),
+        totalDistance: null,
+        sevenDayTotalDistance: 1.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 11}),
+        totalDistance: null,
+        sevenDayTotalDistance: 1.0,
+      },
+      {
+        date: DateTime.fromObject({year: 2021, month: 7, day: 10}),
+        totalDistance: 1.0,
+        sevenDayTotalDistance: 1.0,
       },
     ])
   })
