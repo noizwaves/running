@@ -145,7 +145,7 @@ const WeeklyRange = ({date}) => {
 //
 // Pages
 //
-const RunList = () => {
+const RunListPage = () => {
   const [runs, setRuns] = React.useState(null)
 
   React.useEffect(() => {
@@ -237,7 +237,7 @@ const NivoRunDetailLineChart = ({ title, xData, yData }) => {
   )
 }
 
-const RunDetails = () => {
+const RunDetailsPage = () => {
   const { id } = useParams()
   const [details, setDetails] = React.useState(null)
 
@@ -350,7 +350,7 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
   )
 }
 
-const PlanDetails = () => {
+const PlanDetailsPage = () => {
   const [plan, setPlan] = React.useState(null)
   const [projectForwardWeeks, setProjectForward] = React.useState(26)
   const [weeklyDistanceGain, setWeeklyDistanceGain] = React.useState(0.1)
@@ -489,7 +489,7 @@ const PlanDetails = () => {
   )
 }
 
-const Analyse = () => {
+const AnalysePage = () => {
   const [analysis, setAnalysis] = React.useState(null)
 
   React.useEffect(() => {
@@ -572,16 +572,16 @@ const App = () => {
       <NavigationBar />
       <Switch>
         <Route path="/plan">
-          <PlanDetails />
+          <PlanDetailsPage />
         </Route>
         <Route path="/analyse">
-          <Analyse />
+          <AnalysePage />
         </Route>
         <Route path="/runs/:id">
-          <RunDetails></RunDetails>
+          <RunDetailsPage />
         </Route>
         <Route path="/">
-          <RunList></RunList>
+          <RunListPage />
         </Route>
       </Switch>
     </>
