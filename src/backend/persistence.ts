@@ -58,7 +58,8 @@ export const makeRunCollection = (runsRoot: string): RunCollection => {
   const _cache = {}
 
   const getSummaries = async (): Promise<RunSummary[]> => {
-    const runFilenames = await readdir(runsRoot)
+    const allFilenames = await readdir(runsRoot)
+    const runFilenames = allFilenames.filter((filename) => filename.toLowerCase().endsWith('.fit'))
 
     const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
       const filePath = path.join(runsRoot, filename)
