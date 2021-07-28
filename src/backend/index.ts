@@ -49,7 +49,7 @@ const buildApplication = ({runsRootPath}) => {
 
   app.get('/api/analyse', async (req, res) => {
     const runs = await runCollection.getSummaries()
-    const analysis: Analysis = computeAnalysis(runs)
+    const analysis: Analysis = computeAnalysis(DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(analysis))

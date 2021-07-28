@@ -22,7 +22,7 @@ describe('analysing', () => {
       simpleRun(7, 28, 1.5, 540),
     ]
 
-    const analysis: Analysis = computeAnalysis(runs)
+    const analysis: Analysis = computeAnalysis(DateTime.fromObject({year: 2021, month: 8, day: 5, hour: 18}), runs)
 
     expect(analysis).not.toBeNull()
     expect(analysis.byWeek).toEqual([
@@ -50,7 +50,7 @@ describe('analysing', () => {
       simpleRun(7, 28, 1.5, 540),
     ]
 
-    const analysis: Analysis = computeAnalysis(runs)
+    const analysis: Analysis = computeAnalysis(DateTime.fromObject({year: 2021, month: 8, day: 5, hour: 18}), runs)
 
     expect(analysis).not.toBeNull()
     expect(analysis.byWeek).toEqual([
@@ -72,6 +72,31 @@ describe('analysing', () => {
     ])
   })
 
+  it('excludes runs from current week', () => {
+
+    const runs: RunSummary[] = [
+      simpleRun(7, 14, 0.5, 180),
+      simpleRun(7, 21, 1.0, 360),
+      simpleRun(7, 28, 1.5, 540),
+    ]
+
+    const analysis: Analysis = computeAnalysis(DateTime.fromObject({year: 2021, month: 7, day: 29, hour: 18}), runs)
+
+    expect(analysis).not.toBeNull()
+    expect(analysis.byWeek).toEqual([
+      {
+        start: DateTime.fromObject({year: 2021, month: 7, day: 19}),
+        totalDistance: 1.0,
+        distanceGain: 1.0,
+      },
+      {
+        start: DateTime.fromObject({year: 2021, month: 7, day: 12}),
+        totalDistance: 0.5,
+        distanceGain: null,
+      },
+    ])
+  })
+
   it('performs day by day analysis', () => {
     const runs: RunSummary[] = [
       simpleRun(7, 14, 0.5, 180),
@@ -79,7 +104,7 @@ describe('analysing', () => {
       simpleRun(7, 16, 1.5, 540),
     ]
 
-    const analysis: Analysis = computeAnalysis(runs)
+    const analysis: Analysis = computeAnalysis(DateTime.fromObject({year: 2021, month: 8, day: 5, hour: 18}), runs)
 
     expect(analysis).not.toBeNull()
     expect(analysis.byDay).toEqual([
@@ -104,7 +129,7 @@ describe('analysing', () => {
       simpleRun(7, 17, 1.5, 540),
     ]
 
-    const analysis: Analysis = computeAnalysis(runs)
+    const analysis: Analysis = computeAnalysis(DateTime.fromObject({year: 2021, month: 8, day: 5, hour: 18}), runs)
 
     expect(analysis).not.toBeNull()
     expect(analysis.byDay).toEqual([

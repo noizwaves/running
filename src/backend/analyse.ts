@@ -49,8 +49,10 @@ const addMissingDays = (incomplete) => {
   return Z.sort((a, b) => DateTime.fromISO(a['group']).toMillis() - DateTime.fromISO(b['group']).toMillis(), concatted)
 }
 
-const computeByWeek = (runs: RunSummary[]): ByWeekAnalysis[] => {
-  const grpByWeeks = Z.groupBy(firstDayOfWeek, runs)
+const computeByWeek = (now: DateTime, runs: RunSummary[]): ByWeekAnalysis[] => {
+  const relevantRuns = runs.filter(run => run.startTime < now.startOf('week'))
+
+  const grpByWeeks = Z.groupBy(firstDayOfWeek, relevantRuns)
   const distanceByWeeks = Z.gbSum('totalDistance', grpByWeeks)
   const withMissingWeeks = addMissingWeeks(distanceByWeeks)
 
@@ -83,8 +85,8 @@ const computeByDay = (runs: RunSummary[]): ByDayAnalysis[] => {
   return Z.sort((a, b) => b.date.toMillis() - a.date.toMillis(), unsorted) as ByDayAnalysis[]
 }
 
-export const computeAnalysis = (runs: RunSummary[]): Analysis => {
-  const byWeek = computeByWeek(runs)
+export const computeAnalysis = (now: DateTime, runs: RunSummary[]): Analysis => {
+  const byWeek = computeByWeek(now, runs)
   const byDay = computeByDay(runs)
 
   return {
