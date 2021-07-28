@@ -11,7 +11,7 @@ import { RunListPage } from './RunListPage'
 // Configure leaflet
 // https://github.com/PaulLeCam/react-leaflet/issues/453#issuecomment-761806673
 //
-delete L.Icon.Default.prototype._getIconUrl
+delete (L.Icon.Default.prototype as any)._getIconUrl
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),

@@ -48,7 +48,7 @@ const NivoLineWeeklyDistanceTotalChart = ({ actualData, projectedData }) => {
       <div style={{height: 500}}>
         <ResponsiveLine
             data={data}
-            enableLabel={true}
+            // enableLabel={true}
             isInteractive={true}
             useMesh={true}
             margin={{ top: 10, right: 10, bottom: 35, left: 65 }}
@@ -112,7 +112,7 @@ export const PlanDetailsPage = () => {
     return (
       <>
         <label htmlFor="projectForwardWeeks">Project Forward (Weeks)</label>
-        <select id="projectForwardWeeks" value={projectForwardWeeks} onChange={(e) => setProjectForward(e.target.value)}>
+        <select id="projectForwardWeeks" value={projectForwardWeeks} onChange={(e) => setProjectForward(parseFloat(e.target.value))}>
           {options}
         </select>
       </>
@@ -132,7 +132,7 @@ export const PlanDetailsPage = () => {
     return (
       <>
         <label htmlFor="weeklyDistanceGain">Weekly Distance Gain</label>
-        <select id="weeklyDistanceGain" value={weeklyDistanceGain} onChange={(e) => setWeeklyDistanceGain(e.target.value)}>
+        <select id="weeklyDistanceGain" value={weeklyDistanceGain} onChange={(e) => setWeeklyDistanceGain(parseFloat(e.target.value))}>
           {options}
         </select>
       </>

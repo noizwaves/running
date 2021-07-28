@@ -39,7 +39,7 @@ const NivoLineByDayChart = ({ byDay }) => {
       <div style={{height: 500}}>
         <ResponsiveLine
             data={data}
-            enableLabel={true}
+            // enableLabel={true}
             isInteractive={true}
             useMesh={true}
             margin={{ top: 10, right: 15, bottom: 35, left: 65 }}

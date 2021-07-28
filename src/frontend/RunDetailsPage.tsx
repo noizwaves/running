@@ -33,7 +33,7 @@ const NivoRunDetailLineChart = ({ title, xData, yData }) => {
           xScale={{ type: 'linear' }}
           yScale={{ type: 'linear', min: 'auto' }}
 
-          enableLabel={true}
+          // enableLabel={true}
           isInteractive={true}
           useMesh={true}
 
@@ -52,7 +52,7 @@ const NivoRunDetailLineChart = ({ title, xData, yData }) => {
 }
 
 export const RunDetailsPage = () => {
-  const { id } = useParams()
+  const { id } = useParams<{id: string}>()
   const [details, setDetails] = React.useState(null)
 
   React.useEffect(() => {
