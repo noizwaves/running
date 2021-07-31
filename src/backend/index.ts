@@ -2,9 +2,9 @@ import express from 'express'
 import path from 'path'
 import { DateTime}  from 'luxon'
 
-import { RunCollection, Analysis } from './model'
+import { RunCollection, Analysis, Plan } from './model'
 import { makeRunCollection } from './persistence'
-import { Plan, computePlan } from './plan'
+import { computePlan } from './plan'
 import { computeAnalysis } from './analyse'
 
 //

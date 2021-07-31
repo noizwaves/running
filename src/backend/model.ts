@@ -36,6 +36,43 @@ export interface RunCollection {
   getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>
 }
 
+// Planning
+export interface CurrentWeek {
+  start: DateTime
+  accruedRuns: number[]
+  accruedDistance: number
+
+  projectedDistance: number
+  remainingDistance: number
+
+  asThreeRuns: number[]
+  remainingRuns: number[]
+}
+
+export interface PastWeek {
+  start: DateTime
+  accruedRuns: number[]
+
+  accruedDistance: number
+  projectedDistance: number
+  remainingDistance: number
+}
+
+export interface FutureWeek {
+  start: DateTime
+
+  projectedDistance: number
+
+  asThreeRuns: number[]
+}
+
+export interface Plan {
+  currentWeek: CurrentWeek
+  pastWeeks: PastWeek[]
+  futureWeeks: FutureWeek[]
+}
+
+// Analysing
 export interface ByWeekAnalysis {
   start: DateTime
   totalDistance: number

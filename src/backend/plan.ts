@@ -1,42 +1,7 @@
 import { DateTime } from 'luxon'
 import * as Z from 'zebras'
 
-import { RunSummary } from './model'
-
-export interface CurrentWeek {
-  start: DateTime
-  accruedRuns: number[]
-  accruedDistance: number
-
-  projectedDistance: number
-  remainingDistance: number
-
-  asThreeRuns: number[]
-  remainingRuns: number[]
-}
-
-export interface PastWeek {
-  start: DateTime
-  accruedRuns: number[]
-
-  accruedDistance: number
-  projectedDistance: number
-  remainingDistance: number
-}
-
-export interface FutureWeek {
-  start: DateTime
-
-  projectedDistance: number
-
-  asThreeRuns: number[]
-}
-
-export interface Plan {
-  currentWeek: CurrentWeek
-  pastWeeks: PastWeek[]
-  futureWeeks: FutureWeek[]
-}
+import { CurrentWeek, FutureWeek, PastWeek, Plan, RunSummary } from './model'
 
 const firstDayOfWeek = (run: RunSummary): string => {
   return run.startTime.startOf('week').toISO()

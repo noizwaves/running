@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
-import { RunSummary } from '../../src/backend/model'
-import { Plan, computePlan } from '../../src/backend/plan'
+import { Plan, RunSummary } from '../../src/backend/model'
+import { computePlan } from '../../src/backend/plan'
 
 const simpleDate = (year: number, month: number, day: number): DateTime => {
   return DateTime.fromObject({
