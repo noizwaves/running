@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom'
 import { MapContainer, TileLayer, Polyline } from 'react-leaflet'
 import { ResponsiveLine } from '@nivo/line'
 
-import { DistanceValue, DurationValue, PaceValue } from './ValueDisplaying'
+import { CadenceValue, DistanceValue, DurationValue, HeartRateValue, PaceValue } from './ValueDisplaying'
 
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
@@ -88,9 +88,9 @@ export const RunDetailsPage = () => {
         <dt>Pace</dt>
         <dd><PaceValue speedValue={summary.avgSpeed} /></dd>
         <dt>Heart Rate</dt>
-        <dd>{summary.avgHeartRate}</dd>
+        <dd><HeartRateValue value={summary.avgHeartRate} /></dd>
         <dt>Cadence</dt>
-        <dd>{summary.avgCadence}</dd>
+        <dd><CadenceValue value={summary.avgCadence} /></dd>
       </dl>
       <MapContainer zoom={13} bounds={details.details.location} scrollWheelZoom={false} style={{height: '600', marginBottom: '20'}}>
         <TileLayer
