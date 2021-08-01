@@ -3,7 +3,7 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { DateTime } from 'luxon'
 
-import { DistanceValue, DurationValue, PaceValue } from './ValueDisplaying'
+import { CadenceValue, DistanceValue, DurationValue, HeartRateValue, PaceValue } from './ValueDisplaying'
 
 const parseRuns = (raw) => {
   return raw.map(rawRun => {
@@ -38,10 +38,10 @@ export const RunListPage = () => {
             <Link to={`/runs/${run.id}`}>{run.startTime.toFormat('ccc, M/d/yyyy')}</Link>
           </td>
           <td><DistanceValue value={run.totalDistance} /></td>
-          <td>{run.avgCadence}</td>
+          <td><CadenceValue value={run.avgCadence} /></td>
           <td><DurationValue value={run.totalTime} /></td>
           <td><PaceValue speedValue={run.avgSpeed} /></td>
-          <td>{run.avgHeartRate}</td>
+          <td><HeartRateValue value={run.avgHeartRate} /></td>
         </tr>
       )
     })

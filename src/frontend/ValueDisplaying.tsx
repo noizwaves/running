@@ -71,6 +71,24 @@ export const GainValue = ({value}) => {
   )
 }
 
+export const HeartRateValue = ({value}) => {
+  const formatted = value === null
+    ? '-'
+    : value.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})
+  return (
+    <span>{formatted}</span>
+  )
+}
+
+export const CadenceValue = ({value}: {value: number | null}) => {
+  const formatted = value === null
+    ? '-'
+    : value.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})
+  return (
+    <span>{formatted}</span>
+  )
+}
+
 export const PaceValue = ({speedValue}) => {
   const pace = 1 / (speedValue * 60 / 1000)
   const formatted = Duration.fromObject({minutes: pace})

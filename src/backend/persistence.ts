@@ -19,6 +19,25 @@ const readBufferWithCache = async (cache: any, filePath: string): Promise<any> =
   }
 }
 
+const firstNumberOrNull = (arr: number[]): number | null => {
+  if (arr.length > 0 && typeof arr[0] === 'number') {
+    return arr[0]
+  } else {
+    return null
+  }
+}
+
+const getAvgSpeed = (json: any, totalDistance: number, totalTime: number): number => {
+  const sessionValue = firstNumberOrNull(fitDecoder.getRecordFieldValue(json, 'session', 'avg_speed'))
+
+  // fall back to derived average speed if field not present
+  if (sessionValue === null) {
+    return totalDistance / totalTime
+  } else {
+    sessionValue
+  }
+}
+
 const extractSummary = async (cache: any, filePath: string): Promise<RunSummary> => {
   const buffer = await readBufferWithCache(cache, filePath)
 
@@ -28,9 +47,12 @@ const extractSummary = async (cache: any, filePath: string): Promise<RunSummary>
   const startTime = DateTime.fromJSDate(fitDecoder.getRecordFieldValue(json, 'session', 'start_time')[0])
   const totalDistance = fitDecoder.getRecordFieldValue(json, 'session', 'total_distance')[0]
   const totalTime = fitDecoder.getRecordFieldValue(json, 'session', 'total_timer_time')[0] / 1000
-  const avgHeartRate = fitDecoder.getRecordFieldValue(json, 'session', 'avg_heart_rate')[0]
-  const avgSpeed = fitDecoder.getRecordFieldValue(json, 'session', 'avg_speed')[0]
-  const avgCadence = fitDecoder.getRecordFieldValue(json, 'session', 'avg_cadence')[0] * 2
+
+  const avgHeartRate = firstNumberOrNull(fitDecoder.getRecordFieldValue(json, 'session', 'avg_heart_rate'))
+  const avgSpeed = getAvgSpeed(json, totalDistance, totalTime)
+
+  const rawAvgCadence = firstNumberOrNull(fitDecoder.getRecordFieldValue(json, 'session', 'avg_cadence'))
+  const avgCadence = (rawAvgCadence === null) ? null : rawAvgCadence * 2
 
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
 }

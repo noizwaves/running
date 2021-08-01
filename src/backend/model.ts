@@ -13,13 +13,13 @@ export interface RunSummary {
   totalTime: number
 
   /** Average heart rate for the run (in beats per minute) */
-  avgHeartRate: number
+  avgHeartRate: number | null
 
   /** Average speed of the run (in m/s) */
   avgSpeed: number
 
   /** Average cadence of the run (in steps per minute) */
-  avgCadence: number
+  avgCadence: number | null
 }
 
 export interface RunDetails {
