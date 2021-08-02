@@ -34,7 +34,7 @@ const getAvgSpeed = (json: any, totalDistance: number, totalTime: number): numbe
   if (sessionValue === null) {
     return totalDistance / totalTime
   } else {
-    sessionValue
+    return sessionValue
   }
 }
 
