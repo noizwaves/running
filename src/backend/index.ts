@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { DateTime}  from 'luxon'
 
-import { RunCollection, Analysis, Plan, EffortCollection, Effort } from './model'
+import { RunCollection, Analysis, Plan, EffortCollection, Effort, RunSummary } from './model'
 import { makeEffortCollection, makeRunCollection } from './persistence'
 import { computePlan } from './plan'
 import { computeAnalysis } from './analyse'
@@ -19,6 +19,7 @@ const buildApplication = ({runsRootPath}) => {
   app.get('/api/runs/:id', async (req, res) => {
     const { id } = req.params
 
+    // TODO: how to load run details?
     const { details, summary } = await runCollection.getDetails(id)
 
     res.setHeader('Content-Type', 'application/json')
@@ -26,7 +27,8 @@ const buildApplication = ({runsRootPath}) => {
   })
 
   app.get('/api/runs', async (req, res) => {
-    const runs = await runCollection.getSummaries()
+    const current: Effort = await effortCollection.getCurrentEffort()
+    const runs: RunSummary[] = await effortCollection.getSummaries(current)
 
     runs.sort((a, b) => a.startTime.toMillis() - b.startTime.toMillis()).reverse()
 
@@ -39,7 +41,8 @@ const buildApplication = ({runsRootPath}) => {
     const weeksProjected: number = parseInt(req.query.projectForwardWeeks as string)
     const weeklyDistanceGain: number = parseFloat(req.query.weeklyDistanceGain as string)
 
-    const runs = await runCollection.getSummaries()
+    const current: Effort = await effortCollection.getCurrentEffort()
+    const runs: RunSummary[] = await effortCollection.getSummaries(current)
 
     // Compute the plan
     const plan: Plan = computePlan(weeklyDistanceGain, weeksProjected, DateTime.now(), runs)
@@ -48,13 +51,13 @@ const buildApplication = ({runsRootPath}) => {
     res.send(JSON.stringify(plan))
   })
 
-  app.get('/api/analyse', async (req, res) => {
-    const runs = await runCollection.getSummaries()
-    const analysis: Analysis = computeAnalysis(DateTime.now(), runs)
+  // app.get('/api/analyse', async (req, res) => {
+  //   const runs = await runCollection.getSummaries()
+  //   const analysis: Analysis = computeAnalysis(DateTime.now(), runs)
 
-    res.setHeader('Content-Type', 'application/json')
-    res.send(JSON.stringify(analysis))
-  })
+  //   res.setHeader('Content-Type', 'application/json')
+  //   res.send(JSON.stringify(analysis))
+  // })
 
   app.get('/api/efforts', async (req, res) => {
     const efforts: Effort[] = await effortCollection.getEfforts()
