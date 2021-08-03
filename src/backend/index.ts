@@ -58,9 +58,10 @@ const buildApplication = ({runsRootPath}) => {
 
   app.get('/api/efforts', async (req, res) => {
     const efforts: Effort[] = await effortCollection.getEfforts()
+    const current: Effort = await effortCollection.getCurrentEffort()
 
     res.setHeader('Content-Type', 'application/json')
-    res.send(JSON.stringify({efforts}))
+    res.send(JSON.stringify({current, efforts}))
   })
 
   app.get('/api/efforts/:id/analyse', async (req, res) => {

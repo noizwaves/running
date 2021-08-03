@@ -43,6 +43,7 @@ export interface Effort {
 
 export interface EffortCollection {
   getEfforts: () => Promise<Effort[]>
+  getCurrentEffort: () => Promise<Effort>
   getSummaries: (effort: Effort) => Promise<RunSummary[]>
 }
 

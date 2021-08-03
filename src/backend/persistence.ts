@@ -128,6 +128,14 @@ export const makeEffortCollection = (runsRoot: string): EffortCollection => {
       })
   }
 
+  const getCurrentEffort = async () => {
+    const efforts = await getEfforts()
+
+    efforts.sort((a, b) => a.id.localeCompare(b.id))
+
+    return efforts[efforts.length - 1]
+  }
+
   const getSummaries = async (effort: Effort): Promise<RunSummary[]> => {
     const effortPath = path.join(runsRoot, effort.id)
     const allFilenames = await readdir(effortPath)
@@ -147,6 +155,7 @@ export const makeEffortCollection = (runsRoot: string): EffortCollection => {
 
   return {
     getEfforts,
+    getCurrentEffort,
     getSummaries,
   }
 }

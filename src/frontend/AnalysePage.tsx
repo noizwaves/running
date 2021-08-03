@@ -12,8 +12,8 @@ const parseAnalysis = ({byWeek, byDay}) => {
   }
 }
 
-const parseEfforts = ({efforts}) => {
-  return efforts
+const parseEfforts = ({efforts, current}) => {
+  return {efforts, current}
 }
 
 const NivoLineByDayChart = ({ byDay }) => {
@@ -71,11 +71,9 @@ export const AnalysePage = () => {
     axios.get(`/api/efforts`)
       .then(response => {
         const result = parseEfforts(response.data)
-        setEfforts(result)
 
-        if (result.some((effort) => effort.id === 'current')) {
-          setSelectedEffort('current')
-        }
+        setEfforts(result.efforts)
+        setSelectedEffort(result.current.id)
       })
   }, [])
 
