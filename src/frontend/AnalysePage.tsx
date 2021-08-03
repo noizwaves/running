@@ -67,6 +67,8 @@ export const AnalysePage = () => {
 
   const [analysis, setAnalysis] = React.useState(null)
 
+  const [moreWeeks, setMoreWeeks] = React.useState(false)
+
   React.useEffect(() => {
     axios.get(`/api/efforts`)
       .then(response => {
@@ -94,8 +96,19 @@ export const AnalysePage = () => {
 
   const { byWeek, byDay } = analysis
 
+  const LESS_WEEK_RANGE = 5
+  const getWeekRange = () => {
+    if (!moreWeeks && byWeek.length > LESS_WEEK_RANGE) {
+      return byWeek.slice(0, LESS_WEEK_RANGE)
+    } else {
+      return byWeek
+    }
+  }
+
   const renderByWeekRows = () => {
-    return byWeek.map((week, index) => {
+    const weekRange = getWeekRange()
+
+    return weekRange.map((week, index) => {
       return (
         <tr key={index}>
           <td>
@@ -112,20 +125,35 @@ export const AnalysePage = () => {
     })
   }
 
+  const renderMoreLessButtonRow = () => {
+    const text = moreWeeks ? 'Less' : 'More'
+
+    return (
+      <tr>
+        <td colSpan={3} style={{textAlign: 'center', borderBottom: 0}}>
+          <span className="button button-clear" onClick={() => setMoreWeeks(!moreWeeks)}>{text}</span>
+        </td>
+      </tr>
+    )
+  }
+
   const renderByWeek = () => {
     return (
-      <table>
-        <thead>
-          <tr>
-            <th>Week</th>
-            <th>Total Distance</th>
-            <th>Distance Gain</th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderByWeekRows()}
-        </tbody>
-      </table>
+      <>
+        <table>
+          <thead>
+            <tr>
+              <th>Week</th>
+              <th>Total Distance</th>
+              <th>Distance Gain</th>
+            </tr>
+          </thead>
+          <tbody>
+            {renderByWeekRows()}
+            {renderMoreLessButtonRow()}
+          </tbody>
+        </table>
+      </>
     )
   }
 
