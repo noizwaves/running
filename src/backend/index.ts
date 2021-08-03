@@ -2,8 +2,8 @@ import express from 'express'
 import path from 'path'
 import { DateTime}  from 'luxon'
 
-import { RunCollection, Analysis, Plan, EffortCollection, Effort, RunSummary } from './model'
-import { makeEffortCollection, makeRunCollection } from './persistence'
+import { Analysis, Plan, EffortCollection, Effort, RunSummary } from './model'
+import { makeEffortCollection } from './persistence'
 import { computePlan } from './plan'
 import { computeAnalysis } from './analyse'
 
@@ -11,7 +11,6 @@ import { computeAnalysis } from './analyse'
 // Application
 //
 const buildApplication = ({runsRootPath}) => {
-  const runCollection: RunCollection = makeRunCollection(runsRootPath)
   const effortCollection: EffortCollection = makeEffortCollection(runsRootPath)
 
   const app = express()
@@ -49,14 +48,6 @@ const buildApplication = ({runsRootPath}) => {
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(plan))
   })
-
-  // app.get('/api/analyse', async (req, res) => {
-  //   const runs = await runCollection.getSummaries()
-  //   const analysis: Analysis = computeAnalysis(DateTime.now(), runs)
-
-  //   res.setHeader('Content-Type', 'application/json')
-  //   res.send(JSON.stringify(analysis))
-  // })
 
   app.get('/api/efforts', async (req, res) => {
     const efforts: Effort[] = await effortCollection.getEfforts()

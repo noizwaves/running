@@ -3,7 +3,7 @@ import path from 'path'
 import fitDecoder from 'fit-decoder'
 import { DateTime } from 'luxon'
 
-import { RunId, RunCollection, RunDetails, RunSummary, Effort, EffortCollection } from './model'
+import { RunId, RunDetails, RunSummary, Effort, EffortCollection } from './model'
 
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
@@ -74,40 +74,6 @@ const extractDetails = async (cache: any, filePath: string): Promise<RunDetails>
   const cadence = fitDecoder.getRecordFieldValue(json, 'record', 'cadence')
 
   return {timestamp, location, distance, speed, hrt, cadence}
-}
-
-export const makeRunCollection = (runsRoot: string): RunCollection => {
-  const _cache = {}
-
-  const getSummaries = async (): Promise<RunSummary[]> => {
-    const allFilenames = await readdir(runsRoot)
-    const runFilenames = allFilenames.filter((filename) => filename.toLowerCase().endsWith('.fit'))
-
-    const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
-      const filePath = path.join(runsRoot, filename)
-      const summary = await extractSummary(_cache, filePath)
-      return {
-        ...summary,
-        id: filename,
-      }
-    }))
-
-    return runs
-  }
-
-  const getDetails = async (id: RunId): Promise<{details: RunDetails, summary: RunSummary}> => {
-    const filePath = path.join(runsRoot, id)
-
-    const summary = await extractSummary(_cache, filePath)
-    const details = await extractDetails(_cache, filePath)
-
-    return { details, summary }
-  }
-
-  return {
-    getSummaries,
-    getDetails
-  }
 }
 
 export const makeEffortCollection = (runsRoot: string): EffortCollection => {
