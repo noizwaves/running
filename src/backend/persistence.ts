@@ -57,10 +57,6 @@ const extractSummary = async (cache: any, filePath: string): Promise<RunSummary>
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
 }
 
-const nonNullValues = (arr: (number | undefined)[]): number[] => {
-  return arr.filter(a => a !== null && a !== undefined)
-}
-
 const extractDetails = async (cache: any, filePath: string): Promise<RunDetails> => {
   const buffer = await readBufferWithCache(cache, filePath)
 
@@ -69,13 +65,13 @@ const extractDetails = async (cache: any, filePath: string): Promise<RunDetails>
 
   const timestamp = fitDecoder.getRecordFieldValue(json, 'record', 'timestamp')
   const location = zip(
-    nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'position_lat')),
-    nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'position_long'))
+    fitDecoder.getRecordFieldValue(json, 'record', 'position_lat'),
+    fitDecoder.getRecordFieldValue(json, 'record', 'position_long')
   )
-  const distance = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'distance'))
-  const speed = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'speed'))
-  const hrt = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'heart_rate'))
-  const cadence = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'cadence'))
+  const distance = fitDecoder.getRecordFieldValue(json, 'record', 'distance')
+  const speed = fitDecoder.getRecordFieldValue(json, 'record', 'speed')
+  const hrt = fitDecoder.getRecordFieldValue(json, 'record', 'heart_rate')
+  const cadence = fitDecoder.getRecordFieldValue(json, 'record', 'cadence')
 
   return {timestamp, location, distance, speed, hrt, cadence}
 }
