@@ -16,11 +16,10 @@ const buildApplication = ({runsRootPath}) => {
 
   const app = express()
 
-  app.get('/api/runs/:id', async (req, res) => {
-    const { id } = req.params
+  app.get('/api/runs/:effortId/:id', async (req, res) => {
+    const { effortId, id } = req.params
 
-    // TODO: how to load run details?
-    const { details, summary } = await runCollection.getDetails(id)
+    const { details, summary } = await effortCollection.getDetails({id: effortId}, id)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify({id, details, summary}))

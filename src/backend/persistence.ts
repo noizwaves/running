@@ -146,6 +146,7 @@ export const makeEffortCollection = (runsRoot: string): EffortCollection => {
       const summary = await extractSummary(_cache, filePath)
       return {
         ...summary,
+        effortId: effort.id,
         id: filename,
       }
     }))
@@ -153,9 +154,19 @@ export const makeEffortCollection = (runsRoot: string): EffortCollection => {
     return runs
   }
 
+  const getDetails = async (effort: Effort, id: RunId): Promise<{details: RunDetails, summary: RunSummary}> => {
+    const filePath = path.join(runsRoot, effort.id, id)
+
+    const summary = await extractSummary(_cache, filePath)
+    const details = await extractDetails(_cache, filePath)
+
+    return { details, summary }
+  }
+
   return {
     getEfforts,
     getCurrentEffort,
     getSummaries,
+    getDetails,
   }
 }

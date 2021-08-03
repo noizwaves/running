@@ -52,11 +52,11 @@ const NivoRunDetailLineChart = ({ title, xData, yData }) => {
 }
 
 export const RunDetailsPage = () => {
-  const { id } = useParams<{id: string}>()
+  const { effortId, id } = useParams<{effortId: string, id: string}>()
   const [details, setDetails] = React.useState(null)
 
   React.useEffect(() => {
-    axios.get(`/api/runs/${id}`)
+    axios.get(`/api/runs/${effortId}/${id}`)
       .then(response => {
         setDetails(parseRunDetails(response.data))
       })

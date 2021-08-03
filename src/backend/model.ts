@@ -45,6 +45,7 @@ export interface EffortCollection {
   getEfforts: () => Promise<Effort[]>
   getCurrentEffort: () => Promise<Effort>
   getSummaries: (effort: Effort) => Promise<RunSummary[]>
+  getDetails: (effort: Effort, id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>
 }
 
 // Planning
