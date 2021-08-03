@@ -2,8 +2,8 @@ import express from 'express'
 import path from 'path'
 import { DateTime}  from 'luxon'
 
-import { RunCollection, Analysis, Plan } from './model'
-import { makeRunCollection } from './persistence'
+import { RunCollection, Analysis, Plan, EffortCollection, Effort } from './model'
+import { makeEffortCollection, makeRunCollection } from './persistence'
 import { computePlan } from './plan'
 import { computeAnalysis } from './analyse'
 
@@ -12,6 +12,7 @@ import { computeAnalysis } from './analyse'
 //
 const buildApplication = ({runsRootPath}) => {
   const runCollection: RunCollection = makeRunCollection(runsRootPath)
+  const effortCollection: EffortCollection = makeEffortCollection(runsRootPath)
 
   const app = express()
 
@@ -49,6 +50,22 @@ const buildApplication = ({runsRootPath}) => {
 
   app.get('/api/analyse', async (req, res) => {
     const runs = await runCollection.getSummaries()
+    const analysis: Analysis = computeAnalysis(DateTime.now(), runs)
+
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify(analysis))
+  })
+
+  app.get('/api/efforts', async (req, res) => {
+    const efforts: Effort[] = await effortCollection.getEfforts()
+
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify({efforts}))
+  })
+
+  app.get('/api/efforts/:id/analyse', async (req, res) => {
+    const effort = { id: req.params.id as any as string }
+    const runs = await effortCollection.getSummaries(effort)
     const analysis: Analysis = computeAnalysis(DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')

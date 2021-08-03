@@ -36,6 +36,16 @@ export interface RunCollection {
   getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>
 }
 
+// Efforts
+export interface Effort {
+  id: string
+}
+
+export interface EffortCollection {
+  getEfforts: () => Promise<Effort[]>
+  getSummaries: (effort: Effort) => Promise<RunSummary[]>
+}
+
 // Planning
 export interface CurrentWeek {
   start: DateTime

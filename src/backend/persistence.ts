@@ -3,7 +3,7 @@ import path from 'path'
 import fitDecoder from 'fit-decoder'
 import { DateTime } from 'luxon'
 
-import { RunId, RunCollection, RunDetails, RunSummary } from './model'
+import { RunId, RunCollection, RunDetails, RunSummary, Effort, EffortCollection } from './model'
 
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
@@ -111,5 +111,42 @@ export const makeRunCollection = (runsRoot: string): RunCollection => {
   return {
     getSummaries,
     getDetails
+  }
+}
+
+export const makeEffortCollection = (runsRoot: string): EffortCollection => {
+  const _cache = {}
+
+  const getEfforts = async () => {
+    const allEffortFolderNames = await readdir(runsRoot, {withFileTypes: true})
+    return allEffortFolderNames
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => {
+        return {
+          id: dirent.name
+        }
+      })
+  }
+
+  const getSummaries = async (effort: Effort): Promise<RunSummary[]> => {
+    const effortPath = path.join(runsRoot, effort.id)
+    const allFilenames = await readdir(effortPath)
+    const runFilenames = allFilenames.filter((filename) => filename.toLowerCase().endsWith('.fit'))
+
+    const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
+      const filePath = path.join(effortPath, filename)
+      const summary = await extractSummary(_cache, filePath)
+      return {
+        ...summary,
+        id: filename,
+      }
+    }))
+
+    return runs
+  }
+
+  return {
+    getEfforts,
+    getSummaries,
   }
 }

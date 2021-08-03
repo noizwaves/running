@@ -12,6 +12,10 @@ const parseAnalysis = ({byWeek, byDay}) => {
   }
 }
 
+const parseEfforts = ({efforts}) => {
+  return efforts
+}
+
 const NivoLineByDayChart = ({ byDay }) => {
   const data = [
     {
@@ -58,14 +62,31 @@ const NivoLineByDayChart = ({ byDay }) => {
 }
 
 export const AnalysePage = () => {
+  const [efforts, setEfforts] = React.useState(null)
+  const [selectedEffort, setSelectedEffort] = React.useState(undefined)
+
   const [analysis, setAnalysis] = React.useState(null)
 
   React.useEffect(() => {
-    axios.get(`/api/analyse`)
+    axios.get(`/api/efforts`)
       .then(response => {
-        setAnalysis(parseAnalysis(response.data))
+        const result = parseEfforts(response.data)
+        setEfforts(result)
+
+        if (result.some((effort) => effort.id === 'current')) {
+          setSelectedEffort('current')
+        }
       })
   }, [])
+
+  React.useEffect(() => {
+    if (selectedEffort) {
+      axios.get(`/api/efforts/${selectedEffort}/analyse`)
+        .then(response => {
+          setAnalysis(parseAnalysis(response.data))
+        })
+    }
+  }, [selectedEffort])
 
   if (!analysis) {
     return (
@@ -110,9 +131,29 @@ export const AnalysePage = () => {
     )
   }
 
+  const renderEffortSelector = () => {
+    const optionData = efforts === null
+      ? []
+      : efforts.map(({id}) => [id, id])
+
+    const options = optionData.map(
+      ([value, text]) => <option key={value} value={value}>{text}</option>
+    )
+
+    return (
+      <>
+        <label htmlFor="selectedEffort">Effort</label>
+        <select id="selectedEffort" value={selectedEffort} onChange={(e) => setSelectedEffort(e.target.value)}>
+          {options}
+        </select>
+      </>
+    )
+  }
+
   return (
     <div className='container'>
       <h3>Analyse</h3>
+      {renderEffortSelector()}
       <h4>By Week</h4>
       {renderByWeek()}
       <h4>By Day</h4>
