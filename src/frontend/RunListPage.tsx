@@ -35,7 +35,7 @@ export const RunListPage = () => {
       return (
         <tr key={run.id}>
           <td>
-            <Link to={`/runs/${run.id}`}>{run.startTime.toFormat('ccc, M/d/yyyy')}</Link>
+            <Link to={`/runs/${run.effortId}/${run.id}`}>{run.startTime.toFormat('ccc, M/d/yyyy')}</Link>
           </td>
           <td><DistanceValue value={run.totalDistance} /></td>
           <td><CadenceValue value={run.avgCadence} /></td>

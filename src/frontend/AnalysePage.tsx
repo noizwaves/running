@@ -12,6 +12,10 @@ const parseAnalysis = ({byWeek, byDay}) => {
   }
 }
 
+const parseEfforts = ({efforts, current}) => {
+  return {efforts, current}
+}
+
 const NivoLineByDayChart = ({ byDay }) => {
   const data = [
     {
@@ -58,14 +62,31 @@ const NivoLineByDayChart = ({ byDay }) => {
 }
 
 export const AnalysePage = () => {
+  const [efforts, setEfforts] = React.useState(null)
+  const [selectedEffort, setSelectedEffort] = React.useState(undefined)
+
   const [analysis, setAnalysis] = React.useState(null)
 
+  const [moreWeeks, setMoreWeeks] = React.useState(false)
+
   React.useEffect(() => {
-    axios.get(`/api/analyse`)
+    axios.get(`/api/efforts`)
       .then(response => {
-        setAnalysis(parseAnalysis(response.data))
+        const result = parseEfforts(response.data)
+
+        setEfforts(result.efforts)
+        setSelectedEffort(result.current.id)
       })
   }, [])
+
+  React.useEffect(() => {
+    if (selectedEffort) {
+      axios.get(`/api/efforts/${selectedEffort}/analyse`)
+        .then(response => {
+          setAnalysis(parseAnalysis(response.data))
+        })
+    }
+  }, [selectedEffort])
 
   if (!analysis) {
     return (
@@ -75,8 +96,19 @@ export const AnalysePage = () => {
 
   const { byWeek, byDay } = analysis
 
+  const LESS_WEEK_RANGE = 5
+  const getWeekRange = () => {
+    if (!moreWeeks && byWeek.length > LESS_WEEK_RANGE) {
+      return byWeek.slice(0, LESS_WEEK_RANGE)
+    } else {
+      return byWeek
+    }
+  }
+
   const renderByWeekRows = () => {
-    return byWeek.map((week, index) => {
+    const weekRange = getWeekRange()
+
+    return weekRange.map((week, index) => {
       return (
         <tr key={index}>
           <td>
@@ -93,26 +125,61 @@ export const AnalysePage = () => {
     })
   }
 
+  const renderMoreLessButtonRow = () => {
+    const text = moreWeeks ? 'Less' : 'More'
+
+    return (
+      <tr>
+        <td colSpan={3} style={{textAlign: 'center', borderBottom: 0}}>
+          <span className="button button-clear" onClick={() => setMoreWeeks(!moreWeeks)}>{text}</span>
+        </td>
+      </tr>
+    )
+  }
+
   const renderByWeek = () => {
     return (
-      <table>
-        <thead>
-          <tr>
-            <th>Week</th>
-            <th>Total Distance</th>
-            <th>Distance Gain</th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderByWeekRows()}
-        </tbody>
-      </table>
+      <>
+        <table>
+          <thead>
+            <tr>
+              <th>Week</th>
+              <th>Total Distance</th>
+              <th>Distance Gain</th>
+            </tr>
+          </thead>
+          <tbody>
+            {renderByWeekRows()}
+            {renderMoreLessButtonRow()}
+          </tbody>
+        </table>
+      </>
+    )
+  }
+
+  const renderEffortSelector = () => {
+    const optionData = efforts === null
+      ? []
+      : efforts.map(({id}) => [id, id])
+
+    const options = optionData.map(
+      ([value, text]) => <option key={value} value={value}>{text}</option>
+    )
+
+    return (
+      <>
+        <label htmlFor="selectedEffort">Effort</label>
+        <select id="selectedEffort" value={selectedEffort} onChange={(e) => setSelectedEffort(e.target.value)}>
+          {options}
+        </select>
+      </>
     )
   }
 
   return (
     <div className='container'>
       <h3>Analyse</h3>
+      {renderEffortSelector()}
       <h4>By Week</h4>
       {renderByWeek()}
       <h4>By Day</h4>

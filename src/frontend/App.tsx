@@ -51,7 +51,7 @@ const App = () => {
         <Route path="/analyse">
           <AnalysePage />
         </Route>
-        <Route path="/runs/:id">
+        <Route path="/runs/:effortId/:id">
           <RunDetailsPage />
         </Route>
         <Route path="/">

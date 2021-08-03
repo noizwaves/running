@@ -3,7 +3,7 @@ import path from 'path'
 import fitDecoder from 'fit-decoder'
 import { DateTime } from 'luxon'
 
-import { RunId, RunCollection, RunDetails, RunSummary } from './model'
+import { RunId, RunDetails, RunSummary, Effort, EffortCollection } from './model'
 
 // https://stackoverflow.com/a/22015930
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
@@ -57,10 +57,6 @@ const extractSummary = async (cache: any, filePath: string): Promise<RunSummary>
   return {startTime, totalDistance, totalTime, avgSpeed, avgHeartRate, avgCadence}
 }
 
-const nonNullValues = (arr: (number | undefined)[]): number[] => {
-  return arr.filter(a => a !== null && a !== undefined)
-}
-
 const extractDetails = async (cache: any, filePath: string): Promise<RunDetails> => {
   const buffer = await readBufferWithCache(cache, filePath)
 
@@ -69,29 +65,50 @@ const extractDetails = async (cache: any, filePath: string): Promise<RunDetails>
 
   const timestamp = fitDecoder.getRecordFieldValue(json, 'record', 'timestamp')
   const location = zip(
-    nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'position_lat')),
-    nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'position_long'))
+    fitDecoder.getRecordFieldValue(json, 'record', 'position_lat'),
+    fitDecoder.getRecordFieldValue(json, 'record', 'position_long')
   )
-  const distance = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'distance'))
-  const speed = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'speed'))
-  const hrt = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'heart_rate'))
-  const cadence = nonNullValues(fitDecoder.getRecordFieldValue(json, 'record', 'cadence'))
+  const distance = fitDecoder.getRecordFieldValue(json, 'record', 'distance')
+  const speed = fitDecoder.getRecordFieldValue(json, 'record', 'speed')
+  const hrt = fitDecoder.getRecordFieldValue(json, 'record', 'heart_rate')
+  const cadence = fitDecoder.getRecordFieldValue(json, 'record', 'cadence')
 
   return {timestamp, location, distance, speed, hrt, cadence}
 }
 
-export const makeRunCollection = (runsRoot: string): RunCollection => {
+export const makeEffortCollection = (runsRoot: string): EffortCollection => {
   const _cache = {}
 
-  const getSummaries = async (): Promise<RunSummary[]> => {
-    const allFilenames = await readdir(runsRoot)
+  const getEfforts = async () => {
+    const allEffortFolderNames = await readdir(runsRoot, {withFileTypes: true})
+    return allEffortFolderNames
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => {
+        return {
+          id: dirent.name
+        }
+      })
+  }
+
+  const getCurrentEffort = async () => {
+    const efforts = await getEfforts()
+
+    efforts.sort((a, b) => a.id.localeCompare(b.id))
+
+    return efforts[efforts.length - 1]
+  }
+
+  const getSummaries = async (effort: Effort): Promise<RunSummary[]> => {
+    const effortPath = path.join(runsRoot, effort.id)
+    const allFilenames = await readdir(effortPath)
     const runFilenames = allFilenames.filter((filename) => filename.toLowerCase().endsWith('.fit'))
 
     const runs: any = await Promise.all(runFilenames.map(async (filename: string) => {
-      const filePath = path.join(runsRoot, filename)
+      const filePath = path.join(effortPath, filename)
       const summary = await extractSummary(_cache, filePath)
       return {
         ...summary,
+        effortId: effort.id,
         id: filename,
       }
     }))
@@ -99,8 +116,8 @@ export const makeRunCollection = (runsRoot: string): RunCollection => {
     return runs
   }
 
-  const getDetails = async (id: RunId): Promise<{details: RunDetails, summary: RunSummary}> => {
-    const filePath = path.join(runsRoot, id)
+  const getDetails = async (effort: Effort, id: RunId): Promise<{details: RunDetails, summary: RunSummary}> => {
+    const filePath = path.join(runsRoot, effort.id, id)
 
     const summary = await extractSummary(_cache, filePath)
     const details = await extractDetails(_cache, filePath)
@@ -109,7 +126,9 @@ export const makeRunCollection = (runsRoot: string): RunCollection => {
   }
 
   return {
+    getEfforts,
+    getCurrentEffort,
     getSummaries,
-    getDetails
+    getDetails,
   }
 }

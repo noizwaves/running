@@ -2,8 +2,8 @@ import express from 'express'
 import path from 'path'
 import { DateTime}  from 'luxon'
 
-import { RunCollection, Analysis, Plan } from './model'
-import { makeRunCollection } from './persistence'
+import { Analysis, Plan, EffortCollection, Effort, RunSummary } from './model'
+import { makeEffortCollection } from './persistence'
 import { computePlan } from './plan'
 import { computeAnalysis } from './analyse'
 
@@ -11,21 +11,22 @@ import { computeAnalysis } from './analyse'
 // Application
 //
 const buildApplication = ({runsRootPath}) => {
-  const runCollection: RunCollection = makeRunCollection(runsRootPath)
+  const effortCollection: EffortCollection = makeEffortCollection(runsRootPath)
 
   const app = express()
 
-  app.get('/api/runs/:id', async (req, res) => {
-    const { id } = req.params
+  app.get('/api/runs/:effortId/:id', async (req, res) => {
+    const { effortId, id } = req.params
 
-    const { details, summary } = await runCollection.getDetails(id)
+    const { details, summary } = await effortCollection.getDetails({id: effortId}, id)
 
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify({id, details, summary}))
   })
 
   app.get('/api/runs', async (req, res) => {
-    const runs = await runCollection.getSummaries()
+    const current: Effort = await effortCollection.getCurrentEffort()
+    const runs: RunSummary[] = await effortCollection.getSummaries(current)
 
     runs.sort((a, b) => a.startTime.toMillis() - b.startTime.toMillis()).reverse()
 
@@ -38,7 +39,8 @@ const buildApplication = ({runsRootPath}) => {
     const weeksProjected: number = parseInt(req.query.projectForwardWeeks as string)
     const weeklyDistanceGain: number = parseFloat(req.query.weeklyDistanceGain as string)
 
-    const runs = await runCollection.getSummaries()
+    const current: Effort = await effortCollection.getCurrentEffort()
+    const runs: RunSummary[] = await effortCollection.getSummaries(current)
 
     // Compute the plan
     const plan: Plan = computePlan(weeklyDistanceGain, weeksProjected, DateTime.now(), runs)
@@ -47,8 +49,17 @@ const buildApplication = ({runsRootPath}) => {
     res.send(JSON.stringify(plan))
   })
 
-  app.get('/api/analyse', async (req, res) => {
-    const runs = await runCollection.getSummaries()
+  app.get('/api/efforts', async (req, res) => {
+    const efforts: Effort[] = await effortCollection.getEfforts()
+    const current: Effort = await effortCollection.getCurrentEffort()
+
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify({current, efforts}))
+  })
+
+  app.get('/api/efforts/:id/analyse', async (req, res) => {
+    const effort = { id: req.params.id as any as string }
+    const runs = await effortCollection.getSummaries(effort)
     const analysis: Analysis = computeAnalysis(DateTime.now(), runs)
 
     res.setHeader('Content-Type', 'application/json')

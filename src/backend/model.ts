@@ -31,9 +31,16 @@ export interface RunDetails {
   cadence: any
 }
 
-export interface RunCollection {
-  getSummaries: () => Promise<RunSummary[]>
-  getDetails: (id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>
+// Efforts
+export interface Effort {
+  id: string
+}
+
+export interface EffortCollection {
+  getEfforts: () => Promise<Effort[]>
+  getCurrentEffort: () => Promise<Effort>
+  getSummaries: (effort: Effort) => Promise<RunSummary[]>
+  getDetails: (effort: Effort, id: RunId) => Promise<{details: RunDetails, summary: RunSummary}>
 }
 
 // Planning
